@@ -1,0 +1,15 @@
+{
+  "name": "unnamed",
+  "version": "1.0.0",
+  "description": "undescribed",
+  "main": "docs/index.html",
+  "scripts": {
+    "watch": "npx tsc --watch",
+    "local": "python3 -m http.server -d docs"
+  },
+  "author": "",
+  "license": "MPL-2.0",
+  "devDependencies": {
+    "typescript": "^5.7.2"
+  }
+}
