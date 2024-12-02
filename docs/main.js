@@ -1,5 +1,5 @@
 "use strict";
-const container = document.querySelector('#container');
+const container = document.querySelector('main');
 if (container) {
     for (let i = 0; i < 1000; i++) {
         const img = document.createElement('img');
@@ -7,3 +7,7 @@ if (container) {
         container.appendChild(img);
     }
 }
+const events = ['wheel', 'scroll', 'scrollend', 'touchstart', 'touchend', 'touchmove'];
+events.forEach(str => {
+    document.addEventListener(str, e => console.log(`${str} event`, e));
+});
