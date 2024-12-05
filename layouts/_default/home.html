@@ -1,0 +1,65 @@
+{{ $bannersPerPage := 256 }}
+{{ $pageBaseUrl := "http://localhost:8000" }}
+{{ $imageBaseUrl := "http://localhost:3000/img" }}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>unnamed</title>
+    <!-- meta stuff -->
+    <meta property="og:title" content="unnamed">
+    <meta property="og:locale" content="en_US">
+    <meta name="description" content="undescribed">
+    <meta property="og:description" content="undescribed">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary">
+    <meta property="twitter:title" content="unnamed">
+    <!-- assets -->
+    <link rel="icon" href="./favicon.ico" />
+    <link rel="stylesheet" href="./style.css">
+    {{ with resources.Get "main.ts" }}
+        {{ with . | js.Build (dict "params" (dict 
+            "bannersPerPage" $bannersPerPage
+            "pageBaseUrl" $pageBaseUrl
+            "imageBaseUrl" $imageBaseUrl
+        )) }}
+            <script src="{{ .RelPermalink }}" type="module"></script>
+        {{ end }}
+    {{ end }}
+</head>
+<body>
+    <noscript>
+        Sorry, this page requires JavaScript to be enabled.
+        The old web design is purely aesthetic.
+    </noscript>
+    <main>
+        <article>
+            <h1>unnamed</h1>
+            <p>
+                Jorge Luis Borges' <em>Library of Babel</em> depicts a universe
+                of endless bookshelves, containing every single combination of
+                letters that fits in a 410-page book. [random order, contains
+                all true and false information]
+            </p>
+            <p>
+                Borges' conceptualization of the infinite <em>library</em> in
+                particular has some interesting philosophical implications.
+                A library represents curated knowledge through written
+                information.
+            </p>
+        </article>
+        <div>Previous page</div>
+        <section>
+            <!-- Banners are populated here. The first page is pregenerated. -->
+            {{- range seq $bannersPerPage -}}
+                <a href="{{ $pageBaseUrl }}/{{ . }}" id="{{ . }}">
+                    <img src="{{ $imageBaseUrl }}/{{ . }}" width="88" height="31" loading="lazy"/>
+                </a>
+            {{- end -}}
+        </section>
+        <div>Next page</div>
+    </main>
+</body>
+</html>

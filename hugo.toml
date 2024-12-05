@@ -1,0 +1,14 @@
+languageCode = 'en-us'
+title = 'unnamed'
+publishDir = 'docs'
+assetDir = "src"
+# No extra business just some preprocessing
+disableKinds = [
+    "robotsTXT",
+    "404",
+    "sitemap",
+    "taxonomy",
+    "RSS"
+]
+disableLiveReload = true
+cleanDestinationDir = true

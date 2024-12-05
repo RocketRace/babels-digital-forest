@@ -2,10 +2,11 @@
   "compilerOptions": {
     "target": "es2020",
     "module": "es2020",
-    "outDir": "./docs",
-    "rootDir": "./src",
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
+    "paths": {
+      "@params": ["./src/params.d.ts"]
+    }
   }
 }
