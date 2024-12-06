@@ -30,15 +30,12 @@
     {{ end }}
 </head>
 <body>
-    <noscript>
-        Sorry, this page requires JavaScript to be enabled.
-        The old web design is purely aesthetic.
-    </noscript>
-    <canvas>
-        Please enable the canvas element.
-    </canvas>
     <main>
         <article>
+            <noscript>
+                Sorry, this page requires JavaScript to be enabled.
+                The old web design is purely aesthetic.
+            </noscript>
             <h1>unnamed</h1>
             <p>
                 Jorge Luis Borges' <em>Library of Babel</em> depicts a universe
@@ -54,6 +51,9 @@
             </p>
         </article>
         <div>Previous page</div>
+        <canvas height="1">
+            Please enable the canvas element.
+        </canvas>
         <section>
             <!-- Banners are populated here. The first page is pregenerated. -->
             {{- range seq $bannersPerPage -}}
