@@ -34,6 +34,9 @@
         Sorry, this page requires JavaScript to be enabled.
         The old web design is purely aesthetic.
     </noscript>
+    <canvas>
+        Please enable the canvas element.
+    </canvas>
     <main>
         <article>
             <h1>unnamed</h1>
@@ -54,8 +57,8 @@
         <section>
             <!-- Banners are populated here. The first page is pregenerated. -->
             {{- range seq $bannersPerPage -}}
-                <a href="{{ $pageBaseUrl }}/{{ . }}" id="{{ . }}">
-                    <img src="{{ $imageBaseUrl }}/{{ . }}" width="88" height="31" loading="lazy"/>
+                <a href="{{ $imageBaseUrl }}/{{ . }}" target="_blank">
+                    <canvas id="n{{ . }}" width="88" height="31"></canvas>
                 </a>
             {{- end -}}
         </section>
