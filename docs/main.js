@@ -34,13 +34,13 @@
       }
     }
   };
-  var populatePage = () => {
+  var populatePage = (page) => {
     for (let i = 0n; i < bannersPerPage2; i++) {
-      populateCanvas(i);
+      populateCanvas(page * bannersPerPage2 + i);
     }
   };
-  populatePage();
+  populatePage(0n);
   document.addEventListener("scroll", (event) => {
-    console.log("scroll event", window.scrollY, event);
+    console.log("scroll event", window.scrollY, document.body.clientHeight, event);
   });
 })();

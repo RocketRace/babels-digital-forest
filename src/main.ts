@@ -64,16 +64,16 @@ const populateCanvas = (n: bigint) => {
     }
 }
 
-const populatePage = () => {
-    // something scope-related
+const populatePage = (page: bigint) => {
+    // something weird scope-related
     for (let i = 0n; i < bannersPerPage; i++) {
-        populateCanvas(i);
+        populateCanvas(page * bannersPerPage + i);
     }
 }
 
-populatePage();
+populatePage(0n);
 
 // Debugging events
 document.addEventListener('scroll', event => {
-    console.log('scroll event', window.scrollY, event);
+    console.log('scroll event', window.scrollY, document.body.clientHeight, event);
 })
