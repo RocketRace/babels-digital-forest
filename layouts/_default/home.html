@@ -57,8 +57,8 @@
         <section>
             <!-- Banners are populated here. The first page is pregenerated. -->
             {{- range seq $bannersPerPage -}}
-                <a href="{{ $imageBaseUrl }}/{{ . }}" target="_blank">
-                    <canvas id="n{{ . }}" width="88" height="31"></canvas>
+                <a href="{{ $imageBaseUrl }}/{{ sub . 1 }}" target="_blank">
+                    <canvas id="n{{ sub . 1 }}" width="88" height="31"></canvas>
                 </a>
             {{- end -}}
         </section>
