@@ -28,15 +28,14 @@
       const ctx = canvas.getContext("2d");
       if (ctx) {
         let bits = lcg(n);
+        let hex = bits.toString(16);
         const data = ctx.createImageData(imageWidth, imageHeight);
         for (let y = 0; y < imageHeight; y++) {
           for (let x = 0; x < imageWidth; x++) {
             const i = y * imageWidth + x;
-            const rgb = Number(BigInt.asUintN(24, bits));
-            bits >>= 24n;
-            data.data[i * 4] = rgb >> 16;
-            data.data[i * 4 + 1] = rgb >> 8 & 255;
-            data.data[i * 4 + 2] = rgb & 255;
+            data.data[i * 4] = parseInt(hex.substring(i * 6, i * 6 + 2), 16);
+            data.data[i * 4 + 1] = parseInt(hex.substring(i * 6 + 2, i * 6 + 4), 16);
+            data.data[i * 4 + 2] = parseInt(hex.substring(i * 6 + 4, i * 6 + 6), 16);
             data.data[i * 4 + 3] = 255;
           }
         }
