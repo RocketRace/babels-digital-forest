@@ -14,27 +14,25 @@ if (totalPages * bannersPerPage !== totalBanners) {
 }
 
 // Global state
-let currentPage = 0n;
 let firstLoadedPage = 0n;
 let lastLoadedPage = 0n;
 
-const loadNewPage = (pageNumber: bigint, position: 'before' | 'after') => {
+const loadNewPage = (pageNumber: bigint, position: 'top' | 'bottom') => {
     const section = document.querySelector('section');
     if (section) {
         for (let offset = 0n; offset < bannersPerPage; offset++) {
             const num = pageNumber * bannersPerPage + offset;
             
             const link = document.createElement('a');
-            link.setAttribute('href', `${pageBaseUrl}#${num}`);
-            link.setAttribute('id', num.toString());
+            link.setAttribute('href', `${imageBaseUrl}/${num}`);
+            link.setAttribute('target', "_blank");
             
-            const img = document.createElement('img');
-            img.setAttribute('src', `${imageBaseUrl}/${num}`);
-            img.setAttribute('width', imageWidth.toString());
-            img.setAttribute('height', imageHeight.toString());
-            img.setAttribute('loading', 'lazy');
+            const canvas = document.createElement('canvas');
+            canvas.setAttribute('id', `n${num}`);
+            canvas.setAttribute('width', imageWidth.toString());
+            canvas.setAttribute('height', imageHeight.toString());
             
-            link.append(img);
+            link.append(canvas);
             section.append(link);
         }
     }
@@ -94,6 +92,19 @@ const populatePage = (page: bigint) => {
 populatePage(0n);
 
 // Debugging events
-// document.addEventListener('scroll', event => {
-//     console.log('scroll event', window.scrollY, document.body.clientHeight, event);
-// })
+document.addEventListener('scroll', event => {
+    if (window.scrollY === 0) {
+        console.log("scrolled to top");
+        if (firstLoadedPage !== 0n) {
+            firstLoadedPage -= 1n;
+            loadNewPage(firstLoadedPage, "top");
+            populatePage(firstLoadedPage);
+        }
+    } else if (window.scrollY + window.innerHeight >= document.body.offsetHeight) {
+        if (lastLoadedPage !== totalPages - 1n) {
+            lastLoadedPage += 1n;
+            loadNewPage(lastLoadedPage, "bottom");
+            populatePage(lastLoadedPage);
+        }
+    }
+})

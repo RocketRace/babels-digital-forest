@@ -2,6 +2,7 @@
 (() => {
   // ns-params:@params
   var bannersPerPage = 256;
+  var imageBaseUrl = "https://88x31er.vercel.app/img";
 
   // <stdin>
   var bannersPerPage2 = BigInt(bannersPerPage);
@@ -14,6 +15,25 @@
   if (totalPages * bannersPerPage2 !== totalBanners) {
     console.log(`Pick a power of 2 for bannersPerPage, it's ${bannersPerPage2}`);
   }
+  var firstLoadedPage = 0n;
+  var lastLoadedPage = 0n;
+  var loadNewPage = (pageNumber, position) => {
+    const section = document.querySelector("section");
+    if (section) {
+      for (let offset = 0n; offset < bannersPerPage2; offset++) {
+        const num = pageNumber * bannersPerPage2 + offset;
+        const link = document.createElement("a");
+        link.setAttribute("href", `${imageBaseUrl}/${num}`);
+        link.setAttribute("target", "_blank");
+        const canvas = document.createElement("canvas");
+        canvas.setAttribute("id", `n${num}`);
+        canvas.setAttribute("width", imageWidth.toString());
+        canvas.setAttribute("height", imageHeight.toString());
+        link.append(canvas);
+        section.append(link);
+      }
+    }
+  };
   var m = totalBanners;
   var a = (totalBanners - 3n ** 42500n | 0b11n) ^ 0b10n;
   var c = totalBanners - 5n ** 30000n | 1n;
@@ -49,4 +69,20 @@
     }
   };
   populatePage(0n);
+  document.addEventListener("scroll", (event) => {
+    if (window.scrollY === 0) {
+      console.log("scrolled to top");
+      if (firstLoadedPage !== 0n) {
+        firstLoadedPage -= 1n;
+        loadNewPage(firstLoadedPage, "top");
+        populatePage(firstLoadedPage);
+      }
+    } else if (window.scrollY + window.innerHeight >= document.body.offsetHeight) {
+      if (lastLoadedPage !== totalPages - 1n) {
+        lastLoadedPage += 1n;
+        loadNewPage(lastLoadedPage, "bottom");
+        populatePage(lastLoadedPage);
+      }
+    }
+  });
 })();
