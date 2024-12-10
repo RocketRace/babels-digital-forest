@@ -17,22 +17,42 @@
   }
   var firstLoadedPage = 0n;
   var lastLoadedPage = 0n;
+  var setArticleVisibility = (visibility) => {
+    const article = document.querySelector("article");
+    if (article) {
+      article.hidden = !visibility;
+    }
+  };
   var loadNewPage = (pageNumber, position) => {
+    if (pageNumber === 0n) {
+      setArticleVisibility(true);
+    }
     const section = document.querySelector("section");
     if (section) {
       for (let offset = 0n; offset < bannersPerPage2; offset++) {
         const num = pageNumber * bannersPerPage2 + offset;
         const link = document.createElement("a");
-        link.setAttribute("href", `${imageBaseUrl}/${num}`);
-        link.setAttribute("target", "_blank");
+        link.href = `${imageBaseUrl}/${num}`;
+        link.target = "_blank";
         const canvas = document.createElement("canvas");
-        canvas.setAttribute("id", `n${num}`);
-        canvas.setAttribute("width", imageWidth.toString());
-        canvas.setAttribute("height", imageHeight.toString());
+        canvas.id = `n${num}`;
+        canvas.width = imageWidth;
+        canvas.height = imageHeight;
         link.append(canvas);
         section.append(link);
       }
     }
+  };
+  var goToPage = (pageNumber) => {
+    firstLoadedPage = pageNumber;
+    lastLoadedPage = pageNumber;
+    setArticleVisibility(pageNumber === 0n);
+    const section = document.querySelector("section");
+    if (section) {
+      [...section.childNodes].forEach((child) => section.removeChild(child));
+    }
+    loadNewPage(pageNumber, "bottom");
+    populatePage(pageNumber);
   };
   var m = totalBanners;
   var a = (totalBanners - 3n ** 42500n | 0b11n) ^ 0b10n;
@@ -72,11 +92,7 @@
   document.addEventListener("scroll", (event) => {
     if (window.scrollY === 0) {
       console.log("scrolled to top");
-      if (firstLoadedPage !== 0n) {
-        firstLoadedPage -= 1n;
-        loadNewPage(firstLoadedPage, "top");
-        populatePage(firstLoadedPage);
-      }
+      goToPage(5n);
     } else if (window.scrollY + window.innerHeight >= document.body.offsetHeight) {
       if (lastLoadedPage !== totalPages - 1n) {
         lastLoadedPage += 1n;

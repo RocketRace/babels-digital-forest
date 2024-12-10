@@ -17,25 +17,52 @@ if (totalPages * bannersPerPage !== totalBanners) {
 let firstLoadedPage = 0n;
 let lastLoadedPage = 0n;
 
+
+// This soup of "doAction()" functions is pretty poor 
+// in terms of code architecture but it gets the job done.
+
+const setArticleVisibility = (visibility: boolean) => {
+    const article = document.querySelector('article');
+    if (article) {
+        article.hidden = !visibility;
+    }
+}
+
 const loadNewPage = (pageNumber: bigint, position: 'top' | 'bottom') => {
+    if (pageNumber === 0n) {
+        setArticleVisibility(true);
+    }
     const section = document.querySelector('section');
     if (section) {
         for (let offset = 0n; offset < bannersPerPage; offset++) {
             const num = pageNumber * bannersPerPage + offset;
             
             const link = document.createElement('a');
-            link.setAttribute('href', `${imageBaseUrl}/${num}`);
-            link.setAttribute('target', "_blank");
+            link.href = `${imageBaseUrl}/${num}`;
+            link.target = "_blank";
             
             const canvas = document.createElement('canvas');
-            canvas.setAttribute('id', `n${num}`);
-            canvas.setAttribute('width', imageWidth.toString());
-            canvas.setAttribute('height', imageHeight.toString());
+            canvas.id = `n${num}`;
+            canvas.width = imageWidth;
+            canvas.height = imageHeight;
             
             link.append(canvas);
             section.append(link);
         }
     }
+}
+
+const goToPage = (pageNumber: bigint) => {
+    firstLoadedPage = pageNumber;
+    lastLoadedPage = pageNumber;
+    setArticleVisibility(pageNumber === 0n);
+    const section = document.querySelector('section');
+    if (section) {
+        // make a copy of childNodes as it is updated on removals
+        [...section.childNodes].forEach(child => section.removeChild(child));
+    }
+    loadNewPage(pageNumber, 'bottom');
+    populatePage(pageNumber);
 }
 
 // randomly selected coefficients satisfying the Hull-Dobell theorem
@@ -95,11 +122,12 @@ populatePage(0n);
 document.addEventListener('scroll', event => {
     if (window.scrollY === 0) {
         console.log("scrolled to top");
-        if (firstLoadedPage !== 0n) {
-            firstLoadedPage -= 1n;
-            loadNewPage(firstLoadedPage, "top");
-            populatePage(firstLoadedPage);
-        }
+        goToPage(5n);
+        // if (firstLoadedPage !== 0n) {
+        //     firstLoadedPage -= 1n;
+        //     loadNewPage(firstLoadedPage, "top");
+        //     populatePage(firstLoadedPage);
+        // }
     } else if (window.scrollY + window.innerHeight >= document.body.offsetHeight) {
         if (lastLoadedPage !== totalPages - 1n) {
             lastLoadedPage += 1n;
