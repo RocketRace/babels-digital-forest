@@ -25,7 +25,7 @@
             "pageBaseUrl" $pageBaseUrl
             "imageBaseUrl" $imageBaseUrl
         )) }}
-            <script src="{{ .RelPermalink }}" type="module"></script>
+            <script src="{{ .RelPermalink }}" defer></script>
         {{ end }}
     {{ end }}
 </head>
@@ -45,10 +45,10 @@
                 A library represents curated knowledge through written
                 information.
             </p>
+            <noscript>
+                Please enable JavaScript to use this page.
+            </noscript>
         </article>
-        <noscript>
-            Please enable JavaScript to use this page.
-        </noscript>
         <section>
             <!-- Banners are populated here. The first page is pregenerated. -->
             {{- range seq $bannersPerPage -}}
@@ -58,5 +58,18 @@
             {{- end -}}
         </section>
     </main>
+    <footer>
+        <label>
+            Jump to entry
+            <input type="number" id="goto"></input>
+        </label>
+        <button id="jump">Jump</button>
+        <label>
+            Search by image
+            <input type="file" id="image" accept="image/*,.gif"></input>
+        </label>
+        <button id="search">Search</button>
+        <button id="top">Scroll to top</button>
+    </footer>
 </body>
 </html>

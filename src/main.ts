@@ -65,6 +65,7 @@ const goToPage = (pageNumber: bigint) => {
     populatePage(pageNumber);
 }
 
+
 // randomly selected coefficients satisfying the Hull-Dobell theorem
 // ~> m, c coprime (m power of 2 and c odd)
 // ~> a-1 divisible by prime factors of m (m power of 2 => a odd)
@@ -121,18 +122,34 @@ populatePage(0n);
 // Debugging events
 document.addEventListener('scroll', event => {
     if (window.scrollY === 0) {
-        console.log("scrolled to top");
-        goToPage(5n);
         // if (firstLoadedPage !== 0n) {
         //     firstLoadedPage -= 1n;
         //     loadNewPage(firstLoadedPage, "top");
         //     populatePage(firstLoadedPage);
         // }
     } else if (window.scrollY + window.innerHeight >= document.body.offsetHeight) {
-        if (lastLoadedPage !== totalPages - 1n) {
-            lastLoadedPage += 1n;
-            loadNewPage(lastLoadedPage, "bottom");
-            populatePage(lastLoadedPage);
+        // if (lastLoadedPage !== totalPages - 1n) {
+        //     lastLoadedPage += 1n;
+        //     loadNewPage(lastLoadedPage, "bottom");
+        //     populatePage(lastLoadedPage);
+        // }
+    }
+})
+document.querySelector('#top')?.addEventListener('click', () => goToPage(0n));
+
+document.querySelector('#jump')?.addEventListener('click', () => {
+    const goto = document.querySelector<HTMLInputElement>('#goto');
+    if (goto) {
+        const selected = BigInt(goto.value);
+        goToPage(selected);
+    }
+})
+document.querySelector('#jump')?.addEventListener('click',  () => {
+    const input = document.querySelector<HTMLInputElement>('#image');
+    if (input) {
+        const file = input.files ? input.files[0] : null;
+        if (file) {
+            console.log(file.name);
         }
     }
 })

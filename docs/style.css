@@ -6,11 +6,8 @@ body {
 }
 
 main {
-    background-color: seashell;
-}
-
-main {
     max-width: 70%;
+    background-color: seashell;
 }
 
 h1 {
@@ -22,10 +19,16 @@ p {
 }
 
 section {
+    display: inline-block;
     line-height: 0%;
 }
 
 section > a {
     display: inline-block;
     margin: 0.5em;
+}
+
+footer {
+    position: fixed;
+    bottom: 0;
 }

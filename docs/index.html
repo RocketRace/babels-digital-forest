@@ -22,17 +22,13 @@
     <link rel="stylesheet" href="./style.css">
     
         
-            <script src="/main.js" type="module"></script>
+            <script src="/main.js" defer></script>
         
     
 </head>
 <body>
     <main>
         <article>
-            <noscript>
-                Sorry, this page requires JavaScript to be enabled.
-                The old web design is purely aesthetic.
-            </noscript>
             <h1>unnamed</h1>
             <p>
                 Jorge Luis Borges' <em>Library of Babel</em> depicts a universe
@@ -46,10 +42,10 @@
                 A library represents curated knowledge through written
                 information.
             </p>
+            <noscript>
+                Please enable JavaScript to use this page.
+            </noscript>
         </article>
-        <canvas height="1">
-            Please enable the canvas element.
-        </canvas>
         <section>
             <a href="https://88x31er.vercel.app/img/0" target="_blank">
                     <canvas id="n0" width="88" height="31"></canvas>
@@ -565,5 +561,18 @@
                     <canvas id="n255" width="88" height="31"></canvas>
                 </a></section>
     </main>
+    <footer>
+        <label>
+            Jump to entry
+            <input type="number" id="goto"></input>
+        </label>
+        <button id="jump">Jump</button>
+        <label>
+            Search by image
+            <input type="file" id="image" accept="image/*,.gif"></input>
+        </label>
+        <button id="search">Search</button>
+        <button id="top">Scroll to top</button>
+    </footer>
 </body>
 </html>
