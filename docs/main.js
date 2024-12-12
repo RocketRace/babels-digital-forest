@@ -28,7 +28,7 @@ var loadNewPage = (pageNumber, position) => {
   if (pageNumber === 0n) {
     setArticleVisibility(true);
   }
-  const section = document.querySelector("section");
+  const banners = document.querySelector("#banners");
   const start = pageNumber * bannersPerPage;
   for (let offset = 0n; offset < bannersPerPage; offset++) {
     const num = start + offset;
@@ -40,7 +40,7 @@ var loadNewPage = (pageNumber, position) => {
     canvas.width = imageWidth;
     canvas.height = imageHeight;
     link.append(canvas);
-    section.append(link);
+    banners.append(link);
   }
 };
 var goToPage = (pageNumber) => {
@@ -48,8 +48,8 @@ var goToPage = (pageNumber) => {
   lastLoadedPage = pageNumber;
   setMeterPosition(pageNumber);
   setArticleVisibility(pageNumber === 0n);
-  const section = document.querySelector("section");
-  [...section.childNodes].forEach((child) => section.removeChild(child));
+  const banners = document.querySelector("#banners");
+  [...banners.childNodes].forEach((child) => banners.removeChild(child));
   loadNewPage(pageNumber, "bottom");
   populatePage(pageNumber);
 };
@@ -87,12 +87,20 @@ var setMeterPosition = (page) => {
   visiblePage = page;
   const meter = document.querySelector("meter");
   const meterValue = visiblePage * meterUnits / totalPages;
-  console.log(meterValue);
   meter.value = Number(meterValue);
 };
 populatePage(0n);
 var bottomObserver = new IntersectionObserver(
-  (a2) => console.log(a2),
+  () => {
+    if (lastLoadedPage == totalPages - 1n) {
+      document.querySelector("#bottom").hidden = true;
+    } else {
+      lastLoadedPage += 1n;
+      loadNewPage(lastLoadedPage, "bottom");
+      populatePage(lastLoadedPage);
+      setMeterPosition(lastLoadedPage);
+    }
+  },
   {
     root: document.querySelector("main"),
     threshold: 0.5

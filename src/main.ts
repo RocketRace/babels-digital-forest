@@ -33,7 +33,7 @@ const loadNewPage = (pageNumber: bigint, position: 'top' | 'bottom') => {
     if (pageNumber === 0n) {
         setArticleVisibility(true);
     }
-    const section = document.querySelector('section')!;
+    const banners = document.querySelector('#banners')!;
     const start = pageNumber * bannersPerPage;
     for (let offset = 0n; offset < bannersPerPage; offset++) {
         const num = start + offset;
@@ -48,7 +48,7 @@ const loadNewPage = (pageNumber: bigint, position: 'top' | 'bottom') => {
         canvas.height = imageHeight;
         
         link.append(canvas);
-        section.append(link);
+        banners.append(link);
     }
 }
 
@@ -57,13 +57,12 @@ const goToPage = (pageNumber: bigint) => {
     lastLoadedPage = pageNumber;
     setMeterPosition(pageNumber);
     setArticleVisibility(pageNumber === 0n);
-    const section = document.querySelector('section')!;
+    const banners = document.querySelector('#banners')!;
     // make a copy of childNodes as it is updated on removals
-    [...section.childNodes].forEach(child => section.removeChild(child));
+    [...banners.childNodes].forEach(child => banners.removeChild(child));
     loadNewPage(pageNumber, 'bottom');
     populatePage(pageNumber);
 }
-
 
 // randomly selected coefficients satisfying the Hull-Dobell theorem
 // ~> m, c coprime (m power of 2 and c odd)
@@ -118,14 +117,22 @@ const setMeterPosition = (page: bigint) => {
     const meter = document.querySelector('meter')!;
     // visiblePage / totalPages is in [0, meterUnits)
     const meterValue = visiblePage * meterUnits / totalPages;
-    console.log(meterValue);
     meter.value = Number(meterValue);
 }
 
 populatePage(0n);
 
 const bottomObserver = new IntersectionObserver(
-    a => console.log(a),
+    () => {
+        if (lastLoadedPage == totalPages - 1n) {
+            document.querySelector<HTMLInputElement>('#bottom')!.hidden = true
+        } else {
+            lastLoadedPage += 1n;
+            loadNewPage(lastLoadedPage, "bottom");
+            populatePage(lastLoadedPage);
+            setMeterPosition(lastLoadedPage);
+        }
+    },
     {
         root: document.querySelector('main'),
         threshold: 0.5,
