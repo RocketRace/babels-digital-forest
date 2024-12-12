@@ -22,29 +22,25 @@ var lastLoadedPage = 0n;
 var visiblePage = 0n;
 var setArticleVisibility = (visibility) => {
   const article = document.querySelector("article");
-  if (article) {
-    article.hidden = !visibility;
-  }
+  article.hidden = !visibility;
 };
 var loadNewPage = (pageNumber, position) => {
   if (pageNumber === 0n) {
     setArticleVisibility(true);
   }
   const section = document.querySelector("section");
-  if (section) {
-    const start = pageNumber * bannersPerPage;
-    for (let offset = 0n; offset < bannersPerPage; offset++) {
-      const num = start + offset;
-      const link = document.createElement("a");
-      link.href = `${imageBaseUrl}/${num.toString(16)}`;
-      link.target = "_blank";
-      const canvas = document.createElement("canvas");
-      canvas.id = `x${num.toString(16)}`;
-      canvas.width = imageWidth;
-      canvas.height = imageHeight;
-      link.append(canvas);
-      section.append(link);
-    }
+  const start = pageNumber * bannersPerPage;
+  for (let offset = 0n; offset < bannersPerPage; offset++) {
+    const num = start + offset;
+    const link = document.createElement("a");
+    link.href = `${imageBaseUrl}/${num.toString(16)}`;
+    link.target = "_blank";
+    const canvas = document.createElement("canvas");
+    canvas.id = `x${num.toString(16)}`;
+    canvas.width = imageWidth;
+    canvas.height = imageHeight;
+    link.append(canvas);
+    section.append(link);
   }
 };
 var goToPage = (pageNumber) => {
@@ -53,9 +49,7 @@ var goToPage = (pageNumber) => {
   setMeterPosition(pageNumber);
   setArticleVisibility(pageNumber === 0n);
   const section = document.querySelector("section");
-  if (section) {
-    [...section.childNodes].forEach((child) => section.removeChild(child));
-  }
+  [...section.childNodes].forEach((child) => section.removeChild(child));
   loadNewPage(pageNumber, "bottom");
   populatePage(pageNumber);
 };
@@ -69,24 +63,20 @@ var lcg = (n) => {
 var populateCanvas = (n) => {
   const id = `#x${n.toString(16)}`;
   const canvas = document.querySelector(id);
-  if (canvas) {
-    const ctx = canvas.getContext("2d");
-    if (ctx) {
-      let bits = lcg(n);
-      let hex = bits.toString(16);
-      const data = ctx.createImageData(imageWidth, imageHeight);
-      for (let y = 0; y < imageHeight; y++) {
-        for (let x = 0; x < imageWidth; x++) {
-          const i = y * imageWidth + x;
-          data.data[i * 4] = parseInt(hex.substring(i * 6, i * 6 + 2), 16);
-          data.data[i * 4 + 1] = parseInt(hex.substring(i * 6 + 2, i * 6 + 4), 16);
-          data.data[i * 4 + 2] = parseInt(hex.substring(i * 6 + 4, i * 6 + 6), 16);
-          data.data[i * 4 + 3] = 255;
-        }
-      }
-      ctx.putImageData(data, 0, 0);
+  const ctx = canvas.getContext("2d");
+  let bits = lcg(n);
+  let hex = bits.toString(16);
+  const data = ctx.createImageData(imageWidth, imageHeight);
+  for (let y = 0; y < imageHeight; y++) {
+    for (let x = 0; x < imageWidth; x++) {
+      const i = y * imageWidth + x;
+      data.data[i * 4] = parseInt(hex.substring(i * 6, i * 6 + 2), 16);
+      data.data[i * 4 + 1] = parseInt(hex.substring(i * 6 + 2, i * 6 + 4), 16);
+      data.data[i * 4 + 2] = parseInt(hex.substring(i * 6 + 4, i * 6 + 6), 16);
+      data.data[i * 4 + 3] = 255;
     }
   }
+  ctx.putImageData(data, 0, 0);
 };
 var populatePage = (page) => {
   for (let i = 0n; i < bannersPerPage; i++) {
@@ -96,57 +86,37 @@ var populatePage = (page) => {
 var setMeterPosition = (page) => {
   visiblePage = page;
   const meter = document.querySelector("meter");
-  if (meter) {
-    const meterValue = visiblePage * meterUnits / totalPages;
-    console.log(meterValue);
-    meter.value = Number(meterValue);
-  }
+  const meterValue = visiblePage * meterUnits / totalPages;
+  console.log(meterValue);
+  meter.value = Number(meterValue);
 };
 populatePage(0n);
 var bottomObserver = new IntersectionObserver(
   (a2) => console.log(a2),
   {
-    root: document.querySelector("#bottom"),
+    root: document.querySelector("main"),
     threshold: 0.5
   }
 );
+var bottom = document.querySelector("#bottom");
+bottomObserver.observe(bottom);
 document.addEventListener("scroll", () => {
-  if (window.scrollY === 0) {
-    if (firstLoadedPage !== 0n) {
-      firstLoadedPage -= 1n;
-      loadNewPage(firstLoadedPage, "top");
-      populatePage(firstLoadedPage);
-      setMeterPosition(firstLoadedPage);
-    }
-  } else if (window.scrollY + window.innerHeight >= document.body.offsetHeight) {
-    if (lastLoadedPage !== totalPages - 1n) {
-      lastLoadedPage += 1n;
-      loadNewPage(lastLoadedPage, "bottom");
-      populatePage(lastLoadedPage);
-      setMeterPosition(lastLoadedPage);
-    }
-  } else {
-  }
 });
 document.querySelector("#top")?.addEventListener("click", () => goToPage(0n));
 document.querySelector("#jump")?.addEventListener("click", () => {
   const goto = document.querySelector("#goto");
-  if (goto) {
-    const value = BigInt(goto.value);
-    if (value >= totalBanners) {
-      console.log("kissa");
-    } else {
-      const selectedPage = BigInt(goto.value) / bannersPerPage;
-      goToPage(selectedPage);
-    }
+  const value = BigInt(goto.value);
+  if (value >= totalBanners) {
+    console.log("kissa");
+  } else {
+    const selectedPage = BigInt(goto.value) / bannersPerPage;
+    goToPage(selectedPage);
   }
 });
 document.querySelector("#jump")?.addEventListener("click", () => {
   const input = document.querySelector("#image");
-  if (input) {
-    const file = input.files ? input.files[0] : null;
-    if (file) {
-      console.log(file.name);
-    }
+  const file = input.files ? input.files[0] : null;
+  if (file) {
+    console.log(file.name);
   }
 });
