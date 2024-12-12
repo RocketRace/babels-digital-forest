@@ -1,7 +1,7 @@
 "use strict";
 (() => {
   // ns-params:@params
-  var bannersPerPage = 256;
+  var bannersPerPage = 64;
   var imageBaseUrl = "https://88x31er.vercel.app/img";
 
   // <stdin>
@@ -15,8 +15,10 @@
   if (totalPages * bannersPerPage2 !== totalBanners) {
     console.log(`Pick a power of 2 for bannersPerPage, it's ${bannersPerPage2}`);
   }
+  var meterUnits = 1n << 16n;
   var firstLoadedPage = 0n;
   var lastLoadedPage = 0n;
+  var visiblePage = 0n;
   var setArticleVisibility = (visibility) => {
     const article = document.querySelector("article");
     if (article) {
@@ -29,13 +31,14 @@
     }
     const section = document.querySelector("section");
     if (section) {
+      const start = pageNumber * bannersPerPage2;
       for (let offset = 0n; offset < bannersPerPage2; offset++) {
-        const num = pageNumber * bannersPerPage2 + offset;
+        const num = start + offset;
         const link = document.createElement("a");
-        link.href = `${imageBaseUrl}/${num}`;
+        link.href = `${imageBaseUrl}/${num.toString(16)}`;
         link.target = "_blank";
         const canvas = document.createElement("canvas");
-        canvas.id = `n${num}`;
+        canvas.id = `x${num.toString(16)}`;
         canvas.width = imageWidth;
         canvas.height = imageHeight;
         link.append(canvas);
@@ -46,6 +49,7 @@
   var goToPage = (pageNumber) => {
     firstLoadedPage = pageNumber;
     lastLoadedPage = pageNumber;
+    setMeterPosition(pageNumber);
     setArticleVisibility(pageNumber === 0n);
     const section = document.querySelector("section");
     if (section) {
@@ -63,7 +67,8 @@
     return (n * a + c) % m;
   };
   var populateCanvas = (n) => {
-    const canvas = document.querySelector(`#n${n}`);
+    const id = `#x${n.toString(16)}`;
+    const canvas = document.querySelector(id);
     if (canvas) {
       const ctx = canvas.getContext("2d");
       if (ctx) {
@@ -88,28 +93,45 @@
       populateCanvas(page * bannersPerPage2 + i);
     }
   };
+  var setMeterPosition = (page) => {
+    visiblePage = page;
+    const meter = document.querySelector("meter");
+    if (meter) {
+      const meterValue = visiblePage * meterUnits / totalPages;
+      console.log(meterValue);
+      meter.value = Number(meterValue);
+    }
+  };
   populatePage(0n);
-  document.addEventListener("scroll", (event) => {
+  document.addEventListener("scroll", () => {
     if (window.scrollY === 0) {
       if (firstLoadedPage !== 0n) {
         firstLoadedPage -= 1n;
         loadNewPage(firstLoadedPage, "top");
         populatePage(firstLoadedPage);
+        setMeterPosition(firstLoadedPage);
       }
     } else if (window.scrollY + window.innerHeight >= document.body.offsetHeight) {
       if (lastLoadedPage !== totalPages - 1n) {
         lastLoadedPage += 1n;
         loadNewPage(lastLoadedPage, "bottom");
         populatePage(lastLoadedPage);
+        setMeterPosition(lastLoadedPage);
       }
+    } else {
     }
   });
   document.querySelector("#top")?.addEventListener("click", () => goToPage(0n));
   document.querySelector("#jump")?.addEventListener("click", () => {
     const goto = document.querySelector("#goto");
     if (goto) {
-      const selected = BigInt(goto.value);
-      goToPage(selected);
+      const value = BigInt(goto.value);
+      if (value >= totalBanners) {
+        console.log("kissa");
+      } else {
+        const selectedPage = BigInt(goto.value) / bannersPerPage2;
+        goToPage(selectedPage);
+      }
     }
   });
   document.querySelector("#jump")?.addEventListener("click", () => {

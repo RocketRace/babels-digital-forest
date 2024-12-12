@@ -13,10 +13,12 @@ if (totalPages * bannersPerPage !== totalBanners) {
     console.log(`Pick a power of 2 for bannersPerPage, it's ${bannersPerPage}`);
 }
 
+const meterUnits = 1n << 16n;
+
 // Global state
 let firstLoadedPage = 0n;
 let lastLoadedPage = 0n;
-
+let visiblePage = 0n;
 
 // This soup of "doAction()" functions is pretty poor 
 // in terms of code architecture but it gets the job done.
@@ -34,15 +36,16 @@ const loadNewPage = (pageNumber: bigint, position: 'top' | 'bottom') => {
     }
     const section = document.querySelector('section');
     if (section) {
+        const start = pageNumber * bannersPerPage;
         for (let offset = 0n; offset < bannersPerPage; offset++) {
-            const num = pageNumber * bannersPerPage + offset;
+            const num = start + offset;
             
             const link = document.createElement('a');
-            link.href = `${imageBaseUrl}/${num}`;
+            link.href = `${imageBaseUrl}/${num.toString(16)}`;
             link.target = "_blank";
             
             const canvas = document.createElement('canvas');
-            canvas.id = `n${num}`;
+            canvas.id = `x${num.toString(16)}`;
             canvas.width = imageWidth;
             canvas.height = imageHeight;
             
@@ -55,6 +58,7 @@ const loadNewPage = (pageNumber: bigint, position: 'top' | 'bottom') => {
 const goToPage = (pageNumber: bigint) => {
     firstLoadedPage = pageNumber;
     lastLoadedPage = pageNumber;
+    setMeterPosition(pageNumber);
     setArticleVisibility(pageNumber === 0n);
     const section = document.querySelector('section');
     if (section) {
@@ -88,7 +92,8 @@ const unlcg = (n: bigint): bigint => {
 }
 
 const populateCanvas = (n: bigint) => {
-    const canvas = document.querySelector<HTMLCanvasElement>(`#n${n}`);
+    const id = `#x${n.toString(16)}`
+    const canvas = document.querySelector<HTMLCanvasElement>(id);
     if (canvas) {
         const ctx = canvas.getContext('2d');
         if (ctx) {
@@ -117,31 +122,51 @@ const populatePage = (page: bigint) => {
     }
 }
 
+const setMeterPosition = (page: bigint) => {
+    visiblePage = page;
+    const meter = document.querySelector('meter');
+    if (meter) {
+        // visiblePage / totalPages is in [0, meterUnits)
+        const meterValue = visiblePage * meterUnits / totalPages;
+        console.log(meterValue);
+        meter.value = Number(meterValue);
+    }
+}
+
 populatePage(0n);
 
 // Debugging events
-document.addEventListener('scroll', event => {
+document.addEventListener('scroll', () => {
     if (window.scrollY === 0) {
         if (firstLoadedPage !== 0n) {
             firstLoadedPage -= 1n;
             loadNewPage(firstLoadedPage, "top");
             populatePage(firstLoadedPage);
+            setMeterPosition(firstLoadedPage);
         }
     } else if (window.scrollY + window.innerHeight >= document.body.offsetHeight) {
         if (lastLoadedPage !== totalPages - 1n) {
             lastLoadedPage += 1n;
             loadNewPage(lastLoadedPage, "bottom");
             populatePage(lastLoadedPage);
+            setMeterPosition(lastLoadedPage);
         }
-    }
+    } else {
+        // rough approximation, the precision doesn't matter much
+    }    
 })
 document.querySelector('#top')?.addEventListener('click', () => goToPage(0n));
-
 document.querySelector('#jump')?.addEventListener('click', () => {
     const goto = document.querySelector<HTMLInputElement>('#goto');
     if (goto) {
-        const selected = BigInt(goto.value);
-        goToPage(selected);
+        const value = BigInt(goto.value);
+        if (value >= totalBanners) {
+            // invalid
+            console.log("kissa");
+        } else {
+            const selectedPage = BigInt(goto.value) / bannersPerPage;
+            goToPage(selectedPage);
+        }
     }
 })
 document.querySelector('#jump')?.addEventListener('click',  () => {
