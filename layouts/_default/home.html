@@ -1,4 +1,4 @@
-{{ $bannersPerPage := 64 }}
+{{ $initialBanners := 256 }}
 {{ $pageBaseUrl := "http://localhost:8000" }}
 {{ $imageBaseUrl := "https://88x31er.vercel.app/img" }}
 
@@ -20,11 +20,15 @@
     <link rel="icon" href="./favicon.ico" />
     <link rel="stylesheet" href="./style.css">
     {{ with resources.Get "main.ts" }}
-        {{ with . | js.Build (dict "params" (dict 
-            "bannersPerPage" $bannersPerPage
-            "pageBaseUrl" $pageBaseUrl
-            "imageBaseUrl" $imageBaseUrl
-        )) }}
+        {{ with . | js.Build (dict 
+            "target" "es2020"
+            "format" "esm"
+            "params" (dict 
+                "initialBanners" $initialBanners
+                "pageBaseUrl" $pageBaseUrl
+                "imageBaseUrl" $imageBaseUrl
+            )
+        ) }}
             <script src="{{ .RelPermalink }}" defer></script>
         {{ end }}
     {{ end }}
@@ -51,7 +55,7 @@
         </article>
         <section>
             <!-- Banners are populated here. The first page is pregenerated. -->
-            {{- range seq $bannersPerPage -}}
+            {{- range seq $initialBanners -}}
                 <a href="{{ $imageBaseUrl }}/{{ sub . 1 }}" target="_blank">
                     <canvas id="x{{ sub . 1 | printf "%x" }}" width="88" height="31"></canvas>
                 </a>
