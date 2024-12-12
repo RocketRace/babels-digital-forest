@@ -103,6 +103,13 @@ var setMeterPosition = (page) => {
   }
 };
 populatePage(0n);
+var bottomObserver = new IntersectionObserver(
+  (a2) => console.log(a2),
+  {
+    root: document.querySelector("#bottom"),
+    threshold: 0.5
+  }
+);
 document.addEventListener("scroll", () => {
   if (window.scrollY === 0) {
     if (firstLoadedPage !== 0n) {

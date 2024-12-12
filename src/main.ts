@@ -136,7 +136,14 @@ const setMeterPosition = (page: bigint) => {
 
 populatePage(0n);
 
-// Debugging events
+const bottomObserver = new IntersectionObserver(
+    a => console.log(a),
+    {
+        root: document.querySelector('#bottom'),
+        threshold: 0.5,
+    }
+)
+
 document.addEventListener('scroll', () => {
     if (window.scrollY === 0) {
         if (firstLoadedPage !== 0n) {
