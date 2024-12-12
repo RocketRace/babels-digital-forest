@@ -91,7 +91,17 @@
   populatePage(0n);
   document.addEventListener("scroll", (event) => {
     if (window.scrollY === 0) {
+      if (firstLoadedPage !== 0n) {
+        firstLoadedPage -= 1n;
+        loadNewPage(firstLoadedPage, "top");
+        populatePage(firstLoadedPage);
+      }
     } else if (window.scrollY + window.innerHeight >= document.body.offsetHeight) {
+      if (lastLoadedPage !== totalPages - 1n) {
+        lastLoadedPage += 1n;
+        loadNewPage(lastLoadedPage, "bottom");
+        populatePage(lastLoadedPage);
+      }
     }
   });
   document.querySelector("#top")?.addEventListener("click", () => goToPage(0n));
