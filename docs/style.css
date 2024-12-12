@@ -31,4 +31,11 @@ section > a {
 footer {
     position: fixed;
     bottom: 0;
+    width: 100%;
+    background-color: blue;
+    padding: 1em;
+    color: white;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    justify-items: center;
 }
