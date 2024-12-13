@@ -174,7 +174,7 @@ document.querySelector('#jump')?.addEventListener('click', () => {
         goToPage(selectedPage);
     }
 })
-document.querySelector('#jump')?.addEventListener('click',  () => {
+document.querySelector('#up')?.addEventListener('click',  () => {
     const input = document.querySelector<HTMLInputElement>('#image')!;
     const file = input.files ? input.files[0] : null;
     if (file) {
