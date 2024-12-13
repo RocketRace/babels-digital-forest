@@ -1,101 +1,63 @@
 import { initialBanners, imageBaseUrl } from '@params';
-const bannersPerPage = BigInt(initialBanners);
-import { ainv } from "./constant"
-
-// magic numbers
-const imageWidth = 88;
-const imageHeight = 31;
-const rgbBits = 8 + 8 + 8;
-const totalBits = imageWidth * imageHeight * rgbBits;
-const totalBanners = 1n << BigInt(totalBits);
-const totalPages = totalBanners / bannersPerPage;
-// detect bad params
-if (totalPages * bannersPerPage !== totalBanners) {
-    console.log(`Pick a power of 2 for bannersPerPage, it's ${bannersPerPage}`);
-}
+import { lcg } from "./prng"
+import { height, totalBanners, width } from './constants';
 
 const meterUnits = 1n << 16n;
 
 // Global state
-let firstLoadedPage = 0n;
-let lastLoadedPage = 0n;
-let visiblePage = 0n;
+let rowSize = 5n;
+// Integer division rounding up
+let totalRows = (totalBanners + rowSize - 1n) / rowSize
+let firstRow = 0n;
+let lastRow = 0n;
+let currentRow = 0n;
 
-// This soup of "doAction()" functions is pretty poor 
-// in terms of code architecture but it gets the job done.
-
-const setArticleVisibility = (visibility: boolean) => {
-    const article = document.querySelector('article')!;
-    article.hidden = !visibility;
-}
-
-const loadNewPage = (pageNumber: bigint, position: 'top' | 'bottom') => {
-    if (pageNumber === 0n) {
-        setArticleVisibility(true);
-    }
-    const banners = document.querySelector('#banners')!;
-    const start = pageNumber * bannersPerPage;
-    for (let offset = 0n; offset < bannersPerPage; offset++) {
-        const num = start + offset;
-        
+const spawnRow = (row: bigint, position: 'top' | 'bottom') => {
+    for (let i = 0n; i < rowSize; i++) {
+        const n = row * rowSize + i;
+        const banners = document.querySelector('#banners')!;
         const link = document.createElement('a');
-        link.href = `${imageBaseUrl}/${num.toString(16)}`;
+        link.href = `${imageBaseUrl}/${n.toString(16)}`;
         link.target = "_blank";
         
         const canvas = document.createElement('canvas');
-        canvas.id = `x${num.toString(16)}`;
-        canvas.width = imageWidth;
-        canvas.height = imageHeight;
+        canvas.id = `x${n.toString(16)}`;
+        canvas.width = width;
+        canvas.height = height;
         
         link.append(canvas);
-        banners.append(link);
+        banners.append(link)
+        render(n);
     }
 }
 
-const goToPage = (pageNumber: bigint) => {
-    firstLoadedPage = pageNumber;
-    lastLoadedPage = pageNumber;
-    setMeterPosition(pageNumber);
-    setArticleVisibility(pageNumber === 0n);
+const setVisibility = () => {
+    document.querySelector('article')!.hidden = firstRow !== 0n;
+    document.querySelector<HTMLInputElement>('#top')!.hidden = firstRow === 0n;
+    document.querySelector<HTMLInputElement>('#bottom')!.hidden = lastRow === totalRows - 1n;
+}
+
+const goto = (n: bigint) => {
+    const row = n / rowSize;
+    firstRow = row;
+    lastRow = row - 1n; // will get filled in fillBottom()
     const banners = document.querySelector('#banners')!;
     // make a copy of childNodes as it is updated on removals
     [...banners.childNodes].forEach(child => banners.removeChild(child));
-    loadNewPage(pageNumber, 'bottom');
-    populatePage(pageNumber);
+    fillBottom();
 }
 
-// randomly selected coefficients satisfying the Hull-Dobell theorem
-// ~> m, c coprime (m power of 2 and c odd)
-// ~> a-1 divisible by prime factors of m (m power of 2 => a odd)
-// ~> a-1 divisible by 4 if m divisible by 4 (m divisible by 4 => a = 1 mod 4)
-const m = totalBanners;
-const a = ((totalBanners - 3n ** 42500n) | 0b11n) ^ 0b10n;
-const c = (totalBanners - 5n ** 30000n) | 1n;
-// precomputed modular inverse
-
-// basic shorthand
-const d = (m - c) * ainv;
-
-const lcg = (n: bigint): bigint => {
-    return (n * a + c) % m;
-}
-
-// inverse operation
-const unlcg = (n: bigint): bigint => {
-    return (n * ainv + d) % m;
-}
-
-const populateCanvas = (n: bigint) => {
+const render = (n: bigint) => {
     const id = `#x${n.toString(16)}`
     const canvas = document.querySelector<HTMLCanvasElement>(id)!;
     const ctx = canvas.getContext('2d')!;
     let bits = lcg(n);
     // I'm using a hex string as a u8 buffer
     let hex = bits.toString(16);
-    const data = ctx.createImageData(imageWidth, imageHeight);
-    for (let y = 0; y < imageHeight; y++) {
-        for (let x = 0; x < imageWidth; x++) {
-            const i = y * imageWidth + x;
+    const data = ctx.createImageData(width, height);
+    for (let y = 0; y < height; y++) {
+        for (let x = 0; x < width; x++) {
+            const i = y * width + x;
             data.data[i * 4] = parseInt(hex.substring(i * 6, i * 6 + 2), 16);
             data.data[i * 4 + 1] = parseInt(hex.substring(i * 6 + 2, i * 6 + 4), 16);
             data.data[i * 4 + 2] = parseInt(hex.substring(i * 6 + 4, i * 6 + 6), 16);
@@ -105,38 +67,46 @@ const populateCanvas = (n: bigint) => {
     ctx.putImageData(data, 0, 0);
 }
 
-const populatePage = (page: bigint) => {
-    // something weird scope-related
-    for (let i = 0n; i < bannersPerPage; i++) {
-        populateCanvas(page * bannersPerPage + i);
-    }
-}
-
-const setMeterPosition = (page: bigint) => {
-    visiblePage = page;
+const setMeter = (n: bigint) => {
+    currentRow = n
     const meter = document.querySelector('meter')!;
-    // visiblePage / totalPages is in [0, meterUnits)
-    const meterValue = visiblePage * meterUnits / totalPages;
+    // in [0, meterUnits)
+    const meterValue = n * meterUnits / totalBanners;
     meter.value = Number(meterValue);
 }
 
-populatePage(0n);
+// yeah... using both getBoundingClientRect() and IntersectionObserver together
+const inViewport = (e: Element): boolean => {
+    let rect = bottom.getBoundingClientRect();
+    return (
+        rect.top >= 0 &&
+        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight)
+    );
+}
+
+const fillBottom = () => {
+    const bottom = document.querySelector<HTMLInputElement>('#bottom')!;
+    do {
+        lastRow += 1n;
+        spawnRow(lastRow, 'bottom');
+        setMeter(lastRow);
+        setVisibility();
+        
+    } while (inViewport(bottom) && lastRow < totalRows - 1n);
+}
+
+// begin main
+spawnRow(0n, 'bottom');
 
 const bottomObserver = new IntersectionObserver(
-    () => {
-        if (lastLoadedPage == totalPages - 1n) {
-            document.querySelector<HTMLInputElement>('#bottom')!.hidden = true
-        } else {
-            lastLoadedPage += 1n;
-            loadNewPage(lastLoadedPage, "bottom");
-            populatePage(lastLoadedPage);
-            setMeterPosition(lastLoadedPage);
+    ([entry]) => {
+        if (entry.isIntersecting) {
+            const bottom = document.querySelector<HTMLInputElement>('#bottom')!;
+            setVisibility();
+            fillBottom();
         }
     },
-    {
-        root: document.querySelector('main'),
-        threshold: 0.5,
-    }
+    { root: document.querySelector('main') }
 )
 
 const bottom = document.querySelector('#bottom')!;
@@ -162,22 +132,22 @@ document.addEventListener('scroll', () => {
     //     // rough approximation, the precision doesn't matter much
     // }    
 })
-document.querySelector('#top')?.addEventListener('click', () => goToPage(0n));
 document.querySelector('#jump')?.addEventListener('click', () => {
-    const goto = document.querySelector<HTMLInputElement>('#goto')!;
-    const value = BigInt(goto.value);
+    const target = document.querySelector<HTMLInputElement>('#goto')!;
+    const value = BigInt(target.value);
     if (value >= totalBanners) {
         // invalid
         console.log("kissa");
     } else {
-        const selectedPage = BigInt(goto.value) / bannersPerPage;
-        goToPage(selectedPage);
+        goto(value);
     }
 })
-document.querySelector('#up')?.addEventListener('click',  () => {
+document.querySelector('#search')?.addEventListener('click',  () => {
     const input = document.querySelector<HTMLInputElement>('#image')!;
     const file = input.files ? input.files[0] : null;
     if (file) {
         console.log(file.name);
     }
 })
+document.querySelector('#scroll')?.addEventListener('click', () => goto(0n));
+
