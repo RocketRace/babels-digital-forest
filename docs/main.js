@@ -78,7 +78,7 @@ var setMeter = (n) => {
   meter.value = Number(meterValue);
 };
 var inViewport = (e) => {
-  let rect = bottom.getBoundingClientRect();
+  let rect = e.getBoundingClientRect();
   return rect.top >= 0 && rect.bottom <= (window.innerHeight || document.documentElement.clientHeight);
 };
 var fillBottom = () => {

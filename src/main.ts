@@ -77,7 +77,7 @@ const setMeter = (n: bigint) => {
 
 // yeah... using both getBoundingClientRect() and IntersectionObserver together
 const inViewport = (e: Element): boolean => {
-    let rect = bottom.getBoundingClientRect();
+    let rect = e.getBoundingClientRect();
     return (
         rect.top >= 0 &&
         rect.bottom <= (window.innerHeight || document.documentElement.clientHeight)
