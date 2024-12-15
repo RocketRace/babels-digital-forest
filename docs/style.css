@@ -72,9 +72,3 @@ meter {
     width: 90vw;
     grid-column-end: span 3;
 }
-
-/* #top:not([hidden]),
-#bottom:not([hidden]) {
-    display: block;
-    height: 100px;
-} */

@@ -1,5 +1,5 @@
 import { initialBanners, imageBaseUrl } from '@params';
-import { lcg } from "./prng"
+import { lcg, unlcg } from "./prng"
 import { height, totalBanners, width } from './constants';
 
 const meterUnits = 1n << 16n;
@@ -68,10 +68,11 @@ const render = (n: bigint) => {
 }
 
 const setMeter = (n: bigint) => {
-    currentRow = n
+    const row = n / rowSize;
+    currentRow = row;
     const meter = document.querySelector('meter')!;
     // in [0, meterUnits)
-    const meterValue = n * meterUnits / totalBanners;
+    const meterValue = row * meterUnits / totalBanners;
     meter.value = Number(meterValue);
 }
 
@@ -100,7 +101,6 @@ spawnRow(0n, 'bottom');
 fillBottom();
 // reset scroll position on load, we will be updating it based on the #frag
 history.scrollRestoration = "manual";
-  
 
 let debounced = false;
 document.querySelector("main")?.addEventListener('scroll', () => {
@@ -112,20 +112,6 @@ document.querySelector("main")?.addEventListener('scroll', () => {
             fillBottom();
         }, 100);
     }
-    // if (window.scrollY === 0) {
-    //     if (firstLoadedPage !== 0n) {
-    //         firstLoadedPage -= 1n;
-    //         loadNewPage(firstLoadedPage, "top");
-    //         populatePage(firstLoadedPage);
-    //         setMeterPosition(firstLoadedPage);
-    //     }
-    // } else if (window.scrollY + window.innerHeight >= document.body.offsetHeight) {
-    //     if (lastLoadedPage !== totalPages - 1n) {
-    //         lastLoadedPage += 1n;
-    //         loadNewPage(lastLoadedPage, "bottom");
-    //         populatePage(lastLoadedPage);
-    //         setMeterPosition(lastLoadedPage);
-    //     }
     // } else {
     //     // rough approximation, the precision doesn't matter much
     // }    
@@ -144,7 +130,29 @@ document.querySelector('#search')?.addEventListener('click',  () => {
     const input = document.querySelector<HTMLInputElement>('#image')!;
     const file = input.files ? input.files[0] : null;
     if (file) {
-        console.log(file.name);
+        window.createImageBitmap(file).then(bitmap => {
+            const canvas = new OffscreenCanvas(width, height);
+            const ctx = canvas.getContext('2d')!;
+            ctx.drawImage(bitmap, 0, 0);
+            const pixels = ctx.getImageData(0, 0, width, height);
+            const hex = ['0x'];
+            for (let y = 0; y < height; y++) {
+                for (let x = 0; x < width; x++) {
+                    const i = y * width + x;
+                    const r = pixels.data[i * 4];
+                    const g = pixels.data[i * 4 + 1];
+                    const b = pixels.data[i * 4 + 2];
+                    hex.push(
+                        r.toString(16).padStart(2, "0"),
+                        g.toString(16).padStart(2, "0"),
+                        b.toString(16).padStart(2, "0"),
+                    );
+                }
+            }
+            const n = unlcg(BigInt(hex.join('')));
+            goto(n);
+            setMeter(n);
+        })
     }
 })
 document.querySelector('#scroll')?.addEventListener('click', () => goto(0n));
