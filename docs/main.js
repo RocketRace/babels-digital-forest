@@ -40,7 +40,7 @@ var spawnRow = (row, position) => {
     render(n);
   }
 };
-var setVisibility = () => {
+var setVisibilities = () => {
   document.querySelector("article").hidden = firstRow !== 0n;
   document.querySelector("#top").hidden = firstRow === 0n;
   document.querySelector("#bottom").hidden = lastRow === totalRows - 1n;
@@ -77,33 +77,35 @@ var setMeter = (n) => {
   const meterValue = n * meterUnits / totalBanners;
   meter.value = Number(meterValue);
 };
-var inViewport = (e) => {
-  let rect = e.getBoundingClientRect();
-  return rect.top >= 0 && rect.bottom <= (window.innerHeight || document.documentElement.clientHeight);
+var leewayPixels = 800;
+var spawnableRows = (q) => {
+  const e = document.querySelector(q);
+  const rect = e.getBoundingClientRect();
+  const main = document.querySelector("main");
+  return Math.ceil((main.clientHeight + leewayPixels - rect.top) / height);
 };
 var fillBottom = () => {
-  const bottom2 = document.querySelector("#bottom");
-  do {
+  const rows = spawnableRows("#bottom");
+  for (let i = 0n; i < rows && lastRow < totalRows - 1n; i++) {
     lastRow += 1n;
     spawnRow(lastRow, "bottom");
-    setMeter(lastRow);
-    setVisibility();
-  } while (inViewport(bottom2) && lastRow < totalRows - 1n);
+  }
+  setMeter(lastRow);
+  setVisibilities();
 };
 spawnRow(0n, "bottom");
-var bottomObserver = new IntersectionObserver(
-  ([entry]) => {
-    if (entry.isIntersecting) {
-      const bottom2 = document.querySelector("#bottom");
-      setVisibility();
+fillBottom();
+history.scrollRestoration = "manual";
+var debounced = false;
+document.querySelector("main")?.addEventListener("scroll", () => {
+  if (!debounced) {
+    fillBottom();
+    debounced = true;
+    setTimeout(() => {
+      debounced = false;
       fillBottom();
-    }
-  },
-  { root: document.querySelector("main") }
-);
-var bottom = document.querySelector("#bottom");
-bottomObserver.observe(bottom);
-document.addEventListener("scroll", () => {
+    }, 100);
+  }
 });
 document.querySelector("#jump")?.addEventListener("click", () => {
   const target = document.querySelector("#goto");

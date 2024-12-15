@@ -31,7 +31,7 @@ const spawnRow = (row: bigint, position: 'top' | 'bottom') => {
     }
 }
 
-const setVisibility = () => {
+const setVisibilities = () => {
     document.querySelector('article')!.hidden = firstRow !== 0n;
     document.querySelector<HTMLInputElement>('#top')!.hidden = firstRow === 0n;
     document.querySelector<HTMLInputElement>('#bottom')!.hidden = lastRow === totalRows - 1n;
@@ -75,45 +75,43 @@ const setMeter = (n: bigint) => {
     meter.value = Number(meterValue);
 }
 
-// yeah... using both getBoundingClientRect() and IntersectionObserver together
-const inViewport = (e: Element): boolean => {
-    let rect = e.getBoundingClientRect();
-    return (
-        rect.top >= 0 &&
-        rect.bottom <= (window.innerHeight || document.documentElement.clientHeight)
-    );
+const leewayPixels = 800;
+
+const spawnableRows = (q: string): number => {
+    const e = document.querySelector<HTMLDivElement>(q)!;
+    const rect = e.getBoundingClientRect();
+    const main = document.querySelector("main")!;
+    // overestimation, fine
+    return Math.ceil((main.clientHeight + leewayPixels - rect.top) / height);
 }
 
 const fillBottom = () => {
-    const bottom = document.querySelector<HTMLInputElement>('#bottom')!;
-    do {
+    const rows = spawnableRows("#bottom");
+    for (let i = 0n; i < rows && lastRow < totalRows - 1n; i++) {
         lastRow += 1n;
         spawnRow(lastRow, 'bottom');
-        setMeter(lastRow);
-        setVisibility();
-        
-    } while (inViewport(bottom) && lastRow < totalRows - 1n);
+    }   
+    setMeter(lastRow);
+    setVisibilities();
 }
 
 // begin main
 spawnRow(0n, 'bottom');
+fillBottom();
+// reset scroll position on load, we will be updating it based on the #frag
+history.scrollRestoration = "manual";
+  
 
-const bottomObserver = new IntersectionObserver(
-    ([entry]) => {
-        if (entry.isIntersecting) {
-            const bottom = document.querySelector<HTMLInputElement>('#bottom')!;
-            setVisibility();
+let debounced = false;
+document.querySelector("main")?.addEventListener('scroll', () => {
+    if (!debounced) {
+        fillBottom();
+        debounced = true;
+        setTimeout(() => {
+            debounced = false;
             fillBottom();
-        }
-    },
-    { root: document.querySelector('main') }
-)
-
-const bottom = document.querySelector('#bottom')!;
-bottomObserver.observe(bottom);
-
-
-document.addEventListener('scroll', () => {
+        }, 100);
+    }
     // if (window.scrollY === 0) {
     //     if (firstLoadedPage !== 0n) {
     //         firstLoadedPage -= 1n;
@@ -150,4 +148,3 @@ document.querySelector('#search')?.addEventListener('click',  () => {
     }
 })
 document.querySelector('#scroll')?.addEventListener('click', () => goto(0n));
-

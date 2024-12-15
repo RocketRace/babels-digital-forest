@@ -12,3 +12,4 @@ disableKinds = [
 ]
 disableLiveReload = true
 cleanDestinationDir = true
+build.noJSConfigInAssets = true
