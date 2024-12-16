@@ -1,8 +1,6 @@
-import { initialBanners, imageBaseUrl } from '@params';
+import { initialBanners, imageBaseUrl, meterUnits } from '@params';
 import { lcg, unlcg } from "./prng"
 import { height, totalBanners, width } from './constants';
-
-const meterUnits = 1n << 16n;
 
 // Global state
 let rowSize = 5n;
@@ -72,8 +70,13 @@ const setMeter = (n: bigint) => {
     currentRow = row;
     const meter = document.querySelector('meter')!;
     // in [0, meterUnits)
-    const meterValue = row * meterUnits / totalBanners;
-    meter.value = Number(meterValue);
+    const meterValue = row * BigInt(meterUnits) / totalBanners;
+    const value = Number(meterValue);
+    meter.value = value;
+    
+    const percent = document.querySelector<HTMLLabelElement>('#percent')!;
+    const ratio = value / meterUnits;
+    percent.innerText = `${(ratio * 100).toFixed(6)}%`;
 }
 
 const leewayPixels = 800;
@@ -92,7 +95,7 @@ const fillBottom = () => {
         lastRow += 1n;
         spawnRow(lastRow, 'bottom');
     }   
-    setMeter(lastRow);
+    setMeter(lastRow * rowSize);
     setVisibilities();
 }
 
@@ -151,7 +154,6 @@ document.querySelector('#search')?.addEventListener('click',  () => {
             }
             const n = unlcg(BigInt(hex.join('')));
             goto(n);
-            setMeter(n);
         })
     }
 })

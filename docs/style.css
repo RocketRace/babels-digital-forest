@@ -70,5 +70,8 @@ footer {
 
 meter {
     width: 90vw;
+}
+
+#progress {
     grid-column-end: span 3;
 }

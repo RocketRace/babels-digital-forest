@@ -1,4 +1,5 @@
 {{ $initialBanners := 0 }}
+{{ $meterUnits := math.Pow 2 24 }}
 {{ $pageBaseUrl := "http://localhost:8000" }}
 {{ $imageBaseUrl := "https://88x31er.vercel.app/img" }}
 
@@ -27,6 +28,7 @@
                 "initialBanners" $initialBanners
                 "pageBaseUrl" $pageBaseUrl
                 "imageBaseUrl" $imageBaseUrl
+                "meterUnits" $meterUnits
             )
         ) }}
             <script src="{{ .RelPermalink }}" defer></script>
@@ -77,7 +79,9 @@
         </div>
     </main>
     <footer>
-        <meter min="0" max="65536" value="0" id="position"></meter>
+        <div id="progress">
+            <label id="percent">0%</label>
+            <meter min="0" max="{{ $meterUnits }}" value="0"></meter></div>
         <div>
             <label>
                 Jump to entry

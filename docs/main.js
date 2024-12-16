@@ -1,5 +1,6 @@
 // ns-params:@params
 var imageBaseUrl = "https://88x31er.vercel.app/img";
+var meterUnits = 16777216;
 
 // ns-hugo:/Users/olivia/Documents/code/site/unnamed/src/constants.ts
 var width = 88;
@@ -21,7 +22,6 @@ var unlcg = (n) => {
 };
 
 // <stdin>
-var meterUnits = 1n << 16n;
 var rowSize = 5n;
 var totalRows = (totalBanners + rowSize - 1n) / rowSize;
 var firstRow = 0n;
@@ -78,8 +78,12 @@ var setMeter = (n) => {
   const row = n / rowSize;
   currentRow = row;
   const meter = document.querySelector("meter");
-  const meterValue = row * meterUnits / totalBanners;
-  meter.value = Number(meterValue);
+  const meterValue = row * BigInt(meterUnits) / totalBanners;
+  const value = Number(meterValue);
+  meter.value = value;
+  const percent = document.querySelector("#percent");
+  const ratio = value / meterUnits;
+  percent.innerText = `${(ratio * 100).toFixed(6)}%`;
 };
 var leewayPixels = 800;
 var spawnableRows = (q) => {
@@ -94,7 +98,7 @@ var fillBottom = () => {
     lastRow += 1n;
     spawnRow(lastRow, "bottom");
   }
-  setMeter(lastRow);
+  setMeter(lastRow * rowSize);
   setVisibilities();
 };
 spawnRow(0n, "bottom");
@@ -145,7 +149,6 @@ document.querySelector("#search")?.addEventListener("click", () => {
       }
       const n = unlcg(BigInt(hex.join("")));
       goto(n);
-      setMeter(n);
     });
   }
 });
