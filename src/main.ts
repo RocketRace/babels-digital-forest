@@ -1,6 +1,3 @@
-import { lcg, unlcg } from "./prng.js"
-import { height, totalBanners, width } from './constants.js';
-
 const meterUnits = 1n << 24n;
 const pageBaseUrl = "http://localhost:8000";
 const imageBaseUrl = "https://88x31er.vercel.app/img";
@@ -38,7 +35,7 @@ const spawnRow = (row: bigint, position: 'top' | 'bottom') => {
         } else {
             banners.prepend(link);
         }
-        render(n);
+        worker.postMessage(n);
     }
 }
 
@@ -57,26 +54,6 @@ const goto = (n: bigint) => {
     // make a copy of childNodes as it is updated on removals
     [...banners.childNodes].forEach(child => banners.removeChild(child));
     fill();
-}
-
-const render = (n: bigint) => {
-    const id = `#x${n.toString(16)}`
-    const canvas = document.querySelector<HTMLCanvasElement>(id)!;
-    const ctx = canvas.getContext('2d')!;
-    let bits = lcg(n);
-    // I'm using a hex string as a u8 buffer
-    let hex = bits.toString(16);
-    const data = ctx.createImageData(width, height);
-    for (let y = 0; y < height; y++) {
-        for (let x = 0; x < width; x++) {
-            const i = y * width + x;
-            data.data[i * 4] = parseInt(hex.substring(i * 6, i * 6 + 2), 16);
-            data.data[i * 4 + 1] = parseInt(hex.substring(i * 6 + 2, i * 6 + 4), 16);
-            data.data[i * 4 + 2] = parseInt(hex.substring(i * 6 + 4, i * 6 + 6), 16);
-            data.data[i * 4 + 3] = 0xff;
-        }
-    }
-    ctx.putImageData(data, 0, 0);
 }
 
 const setMeter = (n: bigint) => {
@@ -127,6 +104,16 @@ const fill = () => {
     }
 }
 
+// worker thread for number crunching
+const worker = new Worker("./worker.js");
+worker.onmessage = (e) => {
+    const [n, data] = e.data as [bigint, ImageData];
+    const id = `#x${n.toString(16)}`
+    const canvas = document.querySelector<HTMLCanvasElement>(id)!;
+    const ctx = canvas.getContext('2d')!;
+    ctx.putImageData(data, 0, 0);
+}
+worker.onerror = (e) => console.log("uh oh", e, e.message, e.filename, e.lineno)
 // begin main
 spawnRow(0n, 'bottom');
 fill();
