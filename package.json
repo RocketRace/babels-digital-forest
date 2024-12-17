@@ -1,0 +1,13 @@
+{
+  "name": "unnamed",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "devDependencies": {
+    "typescript": "^5.7.2"
+  },
+  "scripts": {
+    "tsc": "npx tsc --watch",
+    "local": "python3 -m http.server -d docs"
+  }
+}

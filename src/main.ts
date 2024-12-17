@@ -1,5 +1,5 @@
-import { lcg, unlcg } from "./prng"
-import { height, totalBanners, width } from './constants';
+import { lcg, unlcg } from "./prng.js"
+import { height, totalBanners, width } from './constants.js';
 
 const meterUnits = 1n << 24n;
 const pageBaseUrl = "http://localhost:8000";

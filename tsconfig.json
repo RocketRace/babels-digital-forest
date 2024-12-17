@@ -5,8 +5,7 @@
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "strict": true,
-    "paths": {
-      "@params": ["./src/params.d.ts"]
-    }
+    "rootDir": "./src",
+    "outDir": "./docs"
   }
 }
