@@ -79,7 +79,27 @@ const fill = () => {
     const first = firstRow * rowSize;
     const last = lastRow * rowSize + rowSize - 1n;
     const count = Number(last - first);
-    worker.postMessage({ n: first, count: count });
+    let bits = BigInt.asUintN(totalBits, first * a + c);
+    for (let i = 0n; i < count; i++) {
+        const n = first + i;
+        // I'm using a hex string as a u8 buffer
+        let hex = bits.toString(16);
+        const data = new ImageData(width, height);
+        for (let y = 0; y < height; y++) {
+            for (let x = 0; x < width; x++) {
+                const i = y * width + x;
+                data.data[i * 4] = parseInt(hex.substring(i * 6, i * 6 + 2), 16);
+                data.data[i * 4 + 1] = parseInt(hex.substring(i * 6 + 2, i * 6 + 4), 16);
+                data.data[i * 4 + 2] = parseInt(hex.substring(i * 6 + 4, i * 6 + 6), 16);
+                data.data[i * 4 + 3] = 0xff;
+            }
+        }
+        const id = `#x${n.toString(16)}`;
+        const canvas = document.querySelector(id);
+        const ctx = canvas.getContext('2d');
+        ctx.putImageData(data, 0, 0);
+        bits = BigInt.asUintN(totalBits, bits + a);
+    }
     const toScroll = topRows > 0
         ? document.querySelector('#banners').clientHeight - oldHeight
         : 0;
@@ -93,19 +113,6 @@ const fill = () => {
         }
     }
 };
-// worker thread for number crunching
-const worker = new Worker("./worker.js");
-worker.onmessage = (e) => {
-    const { n, nums } = e.data;
-    nums.forEach((data, i) => {
-        const num = n + BigInt(i);
-        const id = `#x${num.toString(16)}`;
-        const canvas = document.querySelector(id);
-        const ctx = canvas.getContext('2d');
-        ctx.putImageData(data, 0, 0);
-    });
-};
-worker.onerror = (e) => console.log("uh oh", e, e.message, e.filename, e.lineno);
 // begin main
 spawnRow(0n, 'bottom');
 fill();
