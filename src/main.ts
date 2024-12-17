@@ -24,7 +24,12 @@ const spawnRow = (row: bigint, position: 'top' | 'bottom') => {
         canvas.height = height;
         
         link.append(canvas);
-        banners.append(link)
+        // this could be funny to write as (?:)(link)
+        if (position === 'bottom') {
+            banners.append(link);
+        } else {
+            banners.prepend(link);
+        }
         render(n);
     }
 }
@@ -38,11 +43,11 @@ const setVisibilities = () => {
 const goto = (n: bigint) => {
     const row = n / rowSize;
     firstRow = row;
-    lastRow = row - 1n; // will get filled in fillBottom()
+    lastRow = row - 1n; // will get filled in fill()
     const banners = document.querySelector('#banners')!;
     // make a copy of childNodes as it is updated on removals
     [...banners.childNodes].forEach(child => banners.removeChild(child));
-    fillBottom();
+    fill();
 }
 
 const render = (n: bigint) => {
@@ -79,40 +84,44 @@ const setMeter = (n: bigint) => {
     percent.innerText = `${(ratio * 100).toFixed(6)}%`;
 }
 
-const leewayPixels = 800;
 
-const spawnableRows = (q: string): number => {
-    const e = document.querySelector<HTMLDivElement>(q)!;
-    const rect = e.getBoundingClientRect();
+const fill = () => {
+    const leeway = 800;
+    const top = document.querySelector<HTMLDivElement>("#top")!;
+    const bottom = document.querySelector<HTMLDivElement>("#bottom")!;
     const main = document.querySelector("main")!;
-    // overestimation, fine
-    return Math.ceil((main.clientHeight + leewayPixels - rect.top) / height);
-}
-
-const fillBottom = () => {
-    const rows = spawnableRows("#bottom");
-    for (let i = 0n; i < rows && lastRow < totalRows - 1n; i++) {
+    const topRows = Math.ceil(
+        (leeway + top.getBoundingClientRect().bottom) / height
+    );
+    const bottomRows = Math.ceil(
+        (main.clientHeight + leeway - bottom.getBoundingClientRect().top) / height
+    );
+    for (let i = 0n; i < topRows && firstRow > 0; i++) {
+        firstRow -= 1n;
+        spawnRow(firstRow, 'top');
+    }
+    for (let i = 0n; i < bottomRows && lastRow < totalRows - 1n; i++) {
         lastRow += 1n;
         spawnRow(lastRow, 'bottom');
-    }   
+    }
     setMeter(lastRow * rowSize);
     setVisibilities();
 }
 
 // begin main
 spawnRow(0n, 'bottom');
-fillBottom();
+fill();
 // reset scroll position on load, we will be updating it based on the #frag
 history.scrollRestoration = "manual";
 
 let debounced = false;
 document.querySelector("main")?.addEventListener('scroll', () => {
     if (!debounced) {
-        fillBottom();
+        fill();
         debounced = true;
         setTimeout(() => {
             debounced = false;
-            fillBottom();
+            fill();
         }, 100);
     }
     // } else {

@@ -39,7 +39,11 @@ var spawnRow = (row, position) => {
     canvas.width = width;
     canvas.height = height;
     link.append(canvas);
-    banners.append(link);
+    if (position === "bottom") {
+      banners.append(link);
+    } else {
+      banners.prepend(link);
+    }
     render(n);
   }
 };
@@ -54,7 +58,7 @@ var goto = (n) => {
   lastRow = row - 1n;
   const banners = document.querySelector("#banners");
   [...banners.childNodes].forEach((child) => banners.removeChild(child));
-  fillBottom();
+  fill();
 };
 var render = (n) => {
   const id = `#x${n.toString(16)}`;
@@ -85,16 +89,22 @@ var setMeter = (n) => {
   const ratio = value / meterUnits;
   percent.innerText = `${(ratio * 100).toFixed(6)}%`;
 };
-var leewayPixels = 800;
-var spawnableRows = (q) => {
-  const e = document.querySelector(q);
-  const rect = e.getBoundingClientRect();
+var fill = () => {
+  const leeway = 800;
+  const top = document.querySelector("#top");
+  const bottom = document.querySelector("#bottom");
   const main = document.querySelector("main");
-  return Math.ceil((main.clientHeight + leewayPixels - rect.top) / height);
-};
-var fillBottom = () => {
-  const rows = spawnableRows("#bottom");
-  for (let i = 0n; i < rows && lastRow < totalRows - 1n; i++) {
+  const topRows = Math.ceil(
+    (leeway + top.getBoundingClientRect().bottom) / height
+  );
+  const bottomRows = Math.ceil(
+    (main.clientHeight + leeway - bottom.getBoundingClientRect().top) / height
+  );
+  for (let i = 0n; i < topRows && firstRow > 0; i++) {
+    firstRow -= 1n;
+    spawnRow(firstRow, "top");
+  }
+  for (let i = 0n; i < bottomRows && lastRow < totalRows - 1n; i++) {
     lastRow += 1n;
     spawnRow(lastRow, "bottom");
   }
@@ -102,16 +112,16 @@ var fillBottom = () => {
   setVisibilities();
 };
 spawnRow(0n, "bottom");
-fillBottom();
+fill();
 history.scrollRestoration = "manual";
 var debounced = false;
 document.querySelector("main")?.addEventListener("scroll", () => {
   if (!debounced) {
-    fillBottom();
+    fill();
     debounced = true;
     setTimeout(() => {
       debounced = false;
-      fillBottom();
+      fill();
     }, 100);
   }
 });
