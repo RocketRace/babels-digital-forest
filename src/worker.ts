@@ -19,6 +19,6 @@ const generateImageData = (n: bigint) => {
 
 onmessage = (e) => {
     const n = e.data as bigint;
-    const result = [n, generateImageData(n)];
+    const result = {n: n, data: generateImageData(n)};
     postMessage(result)
 }

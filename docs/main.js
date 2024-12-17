@@ -93,7 +93,7 @@ const fill = () => {
 // worker thread for number crunching
 const worker = new Worker("./worker.js");
 worker.onmessage = (e) => {
-    const [n, data] = e.data;
+    const { n, data } = e.data;
     const id = `#x${n.toString(16)}`;
     const canvas = document.querySelector(id);
     const ctx = canvas.getContext('2d');
