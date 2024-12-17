@@ -1,4 +1,4 @@
-import { initialBanners, imageBaseUrl, meterUnits } from '@params';
+import { imageBaseUrl, meterUnits } from '@params';
 import { lcg, unlcg } from "./prng"
 import { height, totalBanners, width } from './constants';
 

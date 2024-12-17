@@ -1,4 +1,3 @@
-{{ $initialBanners := 0 }}
 {{ $meterUnits := math.Pow 2 24 }}
 {{ $pageBaseUrl := "http://localhost:8000" }}
 {{ $imageBaseUrl := "https://88x31er.vercel.app/img" }}
@@ -25,7 +24,6 @@
             "target" "es2020"
             "format" "esm"
             "params" (dict 
-                "initialBanners" $initialBanners
                 "pageBaseUrl" $pageBaseUrl
                 "imageBaseUrl" $imageBaseUrl
                 "meterUnits" $meterUnits
@@ -63,12 +61,6 @@
                         <progress></progress>
                     </label>
                     <div id="banners">
-                        <!-- Banners are populated here. The first page is pregenerated. -->
-                        {{- range seq $initialBanners -}}
-                            <a href="{{ $imageBaseUrl }}/{{ sub . 1 }}" target="_blank">
-                                <canvas id="x{{ sub . 1 | printf "%x" }}" width="88" height="31"></canvas>
-                            </a>
-                        {{- end -}}
                     </div>
                     <label id="bottom">
                         Loading...
