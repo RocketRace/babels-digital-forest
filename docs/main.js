@@ -66,9 +66,13 @@ const fill = () => {
     const top = document.querySelector("#top");
     const bottom = document.querySelector("#bottom");
     const main = document.querySelector("main");
-    const oldHeight = document.querySelector('#banners').clientHeight;
     const topRows = Math.ceil((leeway + top.getBoundingClientRect().bottom) / height);
     const bottomRows = Math.ceil((main.clientHeight + leeway - bottom.getBoundingClientRect().top) / height);
+    for (let i = 0n; i < bottomRows && lastRow < totalRows() - 1n; i++) {
+        lastRow += 1n;
+        spawnRow(lastRow, 'bottom');
+    }
+    const oldHeight = document.querySelector('#banners').clientHeight;
     for (let i = 0n; i < topRows && firstRow > 0; i++) {
         firstRow -= 1n;
         spawnRow(firstRow, 'top');
@@ -76,10 +80,6 @@ const fill = () => {
     const toScroll = topRows > 0
         ? document.querySelector('#banners').clientHeight - oldHeight
         : 0;
-    for (let i = 0n; i < bottomRows && lastRow < totalRows() - 1n; i++) {
-        lastRow += 1n;
-        spawnRow(lastRow, 'bottom');
-    }
     setMeter(lastRow * rowSize);
     setVisibilities();
     if (toScroll > 0) {
