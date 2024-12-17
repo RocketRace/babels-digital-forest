@@ -1,6 +1,9 @@
-import { imageBaseUrl, meterUnits } from '@params';
 import { lcg, unlcg } from "./prng"
 import { height, totalBanners, width } from './constants';
+
+const meterUnits = 1n << 24n;
+const pageBaseUrl = "http://localhost:8000";
+const imageBaseUrl = "https://88x31er.vercel.app/img";
 
 const getRowSize = () => BigInt(Math.floor((
     document.querySelector<HTMLDivElement>("#loader")!
@@ -79,12 +82,13 @@ const render = (n: bigint) => {
 const setMeter = (n: bigint) => {
     const meter = document.querySelector('meter')!;
     // in [0, meterUnits)
-    const meterValue = n * BigInt(meterUnits) / totalBanners;
+    const meterValue = n * meterUnits / totalBanners;
     const value = Number(meterValue);
     meter.value = value;
+    meter.max = Number(meterUnits);
     
     const percent = document.querySelector<HTMLLabelElement>('#percent')!;
-    const ratio = value / meterUnits;
+    const ratio = value / Number(meterUnits);
     percent.innerText = `${(ratio * 100).toFixed(6)}%`;
 }
 

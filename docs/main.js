@@ -1,7 +1,3 @@
-// ns-params:@params
-var imageBaseUrl = "https://88x31er.vercel.app/img";
-var meterUnits = 16777216;
-
 // ns-hugo:/Users/olivia/Documents/code/site/unnamed/src/constants.ts
 var width = 88;
 var height = 31;
@@ -22,6 +18,8 @@ var unlcg = (n) => {
 };
 
 // <stdin>
+var meterUnits = 1n << 24n;
+var imageBaseUrl = "https://88x31er.vercel.app/img";
 var getRowSize = () => BigInt(Math.floor(
   (document.querySelector("#loader").getBoundingClientRect().width - 32) / (width + 2 * 4)
   //            WARNING: relies on CSS ^^             ^^^^^
@@ -85,11 +83,12 @@ var render = (n) => {
 };
 var setMeter = (n) => {
   const meter = document.querySelector("meter");
-  const meterValue = n * BigInt(meterUnits) / totalBanners;
+  const meterValue = n * meterUnits / totalBanners;
   const value = Number(meterValue);
   meter.value = value;
+  meter.max = Number(meterUnits);
   const percent = document.querySelector("#percent");
-  const ratio = value / meterUnits;
+  const ratio = value / Number(meterUnits);
   percent.innerText = `${(ratio * 100).toFixed(6)}%`;
 };
 var fill = () => {
