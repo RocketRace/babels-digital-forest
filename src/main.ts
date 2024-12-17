@@ -116,7 +116,10 @@ const fill = () => {
     setVisibilities();
     if (toScroll > 0) {
         const main = document.querySelector("main")!;
-        main.scrollBy(0, toScroll);
+        // only scroll if we're locked to the top of the screen
+        if (main.scrollTop === 0) {
+            main.scrollBy(0, toScroll);
+        }
     }
 }
 

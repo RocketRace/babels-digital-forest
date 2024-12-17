@@ -117,7 +117,9 @@ var fill = () => {
   setVisibilities();
   if (toScroll > 0) {
     const main2 = document.querySelector("main");
-    main2.scrollBy(0, toScroll);
+    if (main2.scrollTop === 0) {
+      main2.scrollBy(0, toScroll);
+    }
   }
 };
 spawnRow(0n, "bottom");

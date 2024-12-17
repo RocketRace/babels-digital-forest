@@ -16,6 +16,11 @@ main {
 #scroller {
     min-height: 100%;
     background: repeat url("./lime.png");
+    /* HACK: using a repeating image with a */
+    /* height of exactly 39px means we don't */
+    /* jump around when banners are prepended */
+    /* (this relies on code and other CSS) */
+    background-size: auto 39px;
     display: flex;
     flex-direction: column;
     align-items: center;
