@@ -1,4 +1,8 @@
-importScripts("./constants.js", "./prng.js");
+importScripts("./constants.js");
+
+const lcg = (n: bigint): bigint => {
+    return BigInt.asUintN(totalBits, n * a + c);
+}
 
 const generateImageData = (n: bigint) => {
     let bits = lcg(n);

@@ -1,5 +1,8 @@
 "use strict";
-importScripts("./constants.js", "./prng.js");
+importScripts("./constants.js");
+const lcg = (n) => {
+    return BigInt.asUintN(totalBits, n * a + c);
+};
 const generateImageData = (n) => {
     let bits = lcg(n);
     // I'm using a hex string as a u8 buffer
