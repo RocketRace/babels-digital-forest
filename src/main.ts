@@ -2,13 +2,18 @@ import { initialBanners, imageBaseUrl, meterUnits } from '@params';
 import { lcg, unlcg } from "./prng"
 import { height, totalBanners, width } from './constants';
 
+const getRowSize = () => BigInt(Math.floor((
+    document.querySelector<HTMLDivElement>("#loader")!
+        .getBoundingClientRect().width - 32) / (width + 2 * 4)
+    //            WARNING: relies on CSS ^^             ^^^^^
+));
 // Global state
-let rowSize = 5n;
+let rowSize = getRowSize();
 // Integer division rounding up
-let totalRows = (totalBanners + rowSize - 1n) / rowSize
+const totalRows = () => (totalBanners + rowSize - 1n) / rowSize;
 let firstRow = 0n;
 let lastRow = 0n;
-let currentRow = 0n;
+let currentValue = 0n;
 
 const spawnRow = (row: bigint, position: 'top' | 'bottom') => {
     for (let i = 0n; i < rowSize; i++) {
@@ -37,10 +42,11 @@ const spawnRow = (row: bigint, position: 'top' | 'bottom') => {
 const setVisibilities = () => {
     document.querySelector('article')!.hidden = firstRow !== 0n;
     document.querySelector<HTMLInputElement>('#top')!.hidden = firstRow === 0n;
-    document.querySelector<HTMLInputElement>('#bottom')!.hidden = lastRow === totalRows - 1n;
+    document.querySelector<HTMLInputElement>('#bottom')!.hidden = lastRow === totalRows() - 1n;
 }
 
 const goto = (n: bigint) => {
+    currentValue = n;
     const row = n / rowSize;
     firstRow = row;
     lastRow = row - 1n; // will get filled in fill()
@@ -71,11 +77,9 @@ const render = (n: bigint) => {
 }
 
 const setMeter = (n: bigint) => {
-    const row = n / rowSize;
-    currentRow = row;
     const meter = document.querySelector('meter')!;
     // in [0, meterUnits)
-    const meterValue = row * BigInt(meterUnits) / totalBanners;
+    const meterValue = n * BigInt(meterUnits) / totalBanners;
     const value = Number(meterValue);
     meter.value = value;
     
@@ -90,6 +94,7 @@ const fill = () => {
     const top = document.querySelector<HTMLDivElement>("#top")!;
     const bottom = document.querySelector<HTMLDivElement>("#bottom")!;
     const main = document.querySelector("main")!;
+    const oldHeight = document.querySelector<HTMLDivElement>('#banners')!.clientHeight;
     const topRows = Math.ceil(
         (leeway + top.getBoundingClientRect().bottom) / height
     );
@@ -100,12 +105,19 @@ const fill = () => {
         firstRow -= 1n;
         spawnRow(firstRow, 'top');
     }
-    for (let i = 0n; i < bottomRows && lastRow < totalRows - 1n; i++) {
+    const toScroll = topRows > 0
+        ? document.querySelector<HTMLDivElement>('#banners')!.clientHeight - oldHeight
+        : 0;
+    for (let i = 0n; i < bottomRows && lastRow < totalRows() - 1n; i++) {
         lastRow += 1n;
         spawnRow(lastRow, 'bottom');
     }
     setMeter(lastRow * rowSize);
     setVisibilities();
+    if (toScroll > 0) {
+        const main = document.querySelector("main")!;
+        main.scrollBy(0, toScroll);
+    }
 }
 
 // begin main
@@ -124,10 +136,20 @@ document.querySelector("main")?.addEventListener('scroll', () => {
             fill();
         }, 100);
     }
-    // } else {
-    //     // rough approximation, the precision doesn't matter much
-    // }    
+    const pos = document.querySelector("main")!.scrollTop;
+    const offset = document.querySelector("article")!.getBoundingClientRect().height;
+    const clamped = Math.max(0, pos - offset);
+    const roughDelta = BigInt(Math.floor(clamped / (height + 8)));
+    //                               WARNING: reliant on CSS ^
+    currentValue = (firstRow + roughDelta) * rowSize;
 })
+window.addEventListener('resize', () => {
+    const oldRowSize = rowSize;
+    rowSize = getRowSize();
+    if (oldRowSize !== rowSize) {
+        goto(currentValue);
+    }
+});
 document.querySelector('#jump')?.addEventListener('click', () => {
     const target = document.querySelector<HTMLInputElement>('#goto')!;
     const value = BigInt(target.value);

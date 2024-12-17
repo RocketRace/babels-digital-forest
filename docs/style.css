@@ -42,7 +42,8 @@ p {
 #loader {
     background-color: darkslateblue;
     color: aliceblue;
-    padding: 1em;
+    /* WARNING: code relies on this */
+    padding: 16px;
 }
 
 #banners {
@@ -52,7 +53,8 @@ p {
 
 #banners > a {
     display: inline-block;
-    margin: 4px;
+    /* WARNING: code relies on this */
+    padding: 4px;
 }
 
 footer {
