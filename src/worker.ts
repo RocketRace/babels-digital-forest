@@ -1,5 +1,4 @@
 importScripts("./constants.js", "./prng.js");
-// stubs due to importScripts not being typescript-native
 
 const generateImageData = (n: bigint) => {
     let bits = lcg(n);

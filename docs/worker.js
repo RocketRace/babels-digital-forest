@@ -1,6 +1,5 @@
 "use strict";
 importScripts("./constants.js", "./prng.js");
-// stubs due to importScripts not being typescript-native
 const generateImageData = (n) => {
     let bits = lcg(n);
     // I'm using a hex string as a u8 buffer
