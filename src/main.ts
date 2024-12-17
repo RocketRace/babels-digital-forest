@@ -80,19 +80,31 @@ const fill = () => {
     const bottomRows = Math.ceil(
         (main.clientHeight + leeway - bottom.getBoundingClientRect().top) / height
     );
+    const oldLast = lastRow;
     for (let i = 0n; i < bottomRows && lastRow < totalRows() - 1n; i++) {
         lastRow += 1n;
         spawnRow(lastRow, 'bottom');
     }
     const oldHeight = document.querySelector<HTMLDivElement>('#banners')!.clientHeight;
+    const oldFirst = firstRow;
     for (let i = 0n; i < topRows && firstRow > 0; i++) {
         firstRow -= 1n;
         spawnRow(firstRow, 'top');
     }
-    const first = firstRow * rowSize
-    const last = lastRow * rowSize + rowSize - 1n;
-    const count = Number(last - first);
-    worker.postMessage({first, count});
+    const lastCount = Number((lastRow - oldLast) * rowSize);
+    if (lastCount > 0) {
+        worker.postMessage({
+            first: oldLast * rowSize,
+            count: lastCount
+        });
+    }
+    const firstCount = Number((oldFirst - firstRow) * rowSize);
+    if (firstCount > 0) {
+        worker.postMessage({
+            first: firstRow * rowSize,
+            count: firstCount
+        });
+    }
     const toScroll = topRows > 0
         ? document.querySelector<HTMLDivElement>('#banners')!.clientHeight - oldHeight
         : 0;
