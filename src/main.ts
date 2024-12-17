@@ -35,7 +35,6 @@ const spawnRow = (row: bigint, position: 'top' | 'bottom') => {
         } else {
             banners.prepend(link);
         }
-        worker.postMessage(n);
     }
 }
 
@@ -90,6 +89,10 @@ const fill = () => {
         firstRow -= 1n;
         spawnRow(firstRow, 'top');
     }
+    const first = firstRow * rowSize
+    const last = lastRow * rowSize + rowSize - 1n;
+    const count = Number(last - first);
+    worker.postMessage({n: first, count: count})
     const toScroll = topRows > 0
         ? document.querySelector<HTMLDivElement>('#banners')!.clientHeight - oldHeight
         : 0;
@@ -107,11 +110,14 @@ const fill = () => {
 // worker thread for number crunching
 const worker = new Worker("./worker.js");
 worker.onmessage = (e) => {
-    const {n, data} = e.data;
-    const id = `#x${n.toString(16)}`
-    const canvas = document.querySelector<HTMLCanvasElement>(id)!;
-    const ctx = canvas.getContext('2d')!;
-    ctx.putImageData(data, 0, 0);
+    const {n, nums} = e.data;
+    nums.forEach((data: ImageData, i: number) => {
+        const num = n + BigInt(i);
+        const id = `#x${num.toString(16)}`
+        const canvas = document.querySelector<HTMLCanvasElement>(id)!;
+        const ctx = canvas.getContext('2d')!;
+        ctx.putImageData(data, 0, 0);
+    });
 }
 worker.onerror = (e) => console.log("uh oh", e, e.message, e.filename, e.lineno)
 // begin main
