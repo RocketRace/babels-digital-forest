@@ -1,4 +1,4 @@
-import { totalBanners } from "./constants";
+import { totalBits, totalBanners } from "./constants";
 
 // randomly selected coefficients satisfying the Hull-Dobell theorem
 // ~> m, c coprime (m power of 2 and c odd)
@@ -14,10 +14,10 @@ export const ainv = 0x5de57821816a4149b262cbdd8bd8f4dcb089dcdcf0b796f0482e002a0e
 const d = (m - c) * ainv % m;
 
 export const lcg = (n: bigint): bigint => {
-    return (n * a + c) % m;
+    return BigInt.asUintN(totalBits, n * a + c);
 }
 
 // inverse operation
 export const unlcg = (n: bigint): bigint => {
-    return (n * ainv + d) % m;
+    return BigInt.asUintN(totalBits, n * ainv + d);
 }
