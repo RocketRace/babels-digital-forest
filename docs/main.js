@@ -61,7 +61,7 @@ const setMeter = (n) => {
     percent.innerText = `${(ratio * 100).toFixed(6)}%`;
 };
 const fill = () => {
-    const leeway = 800;
+    const leeway = 400;
     const top = document.querySelector("#top");
     const bottom = document.querySelector("#bottom");
     const main = document.querySelector("main");
@@ -79,27 +79,7 @@ const fill = () => {
     const first = firstRow * rowSize;
     const last = lastRow * rowSize + rowSize - 1n;
     const count = Number(last - first);
-    let bits = BigInt.asUintN(totalBits, first * a + c);
-    for (let i = 0n; i < count; i++) {
-        const n = first + i;
-        // I'm using a hex string as a u8 buffer
-        let hex = bits.toString(16);
-        const data = new ImageData(width, height);
-        for (let y = 0; y < height; y++) {
-            for (let x = 0; x < width; x++) {
-                const i = y * width + x;
-                data.data[i * 4] = parseInt(hex.substring(i * 6, i * 6 + 2), 16);
-                data.data[i * 4 + 1] = parseInt(hex.substring(i * 6 + 2, i * 6 + 4), 16);
-                data.data[i * 4 + 2] = parseInt(hex.substring(i * 6 + 4, i * 6 + 6), 16);
-                data.data[i * 4 + 3] = 0xff;
-            }
-        }
-        const id = `#x${n.toString(16)}`;
-        const canvas = document.querySelector(id);
-        const ctx = canvas.getContext('2d');
-        ctx.putImageData(data, 0, 0);
-        bits = BigInt.asUintN(totalBits, bits + a);
-    }
+    worker.postMessage({ first, count });
     const toScroll = topRows > 0
         ? document.querySelector('#banners').clientHeight - oldHeight
         : 0;
@@ -113,11 +93,22 @@ const fill = () => {
         }
     }
 };
+// worker thread for less freezing
+const worker = new Worker("./worker.js");
+worker.onmessage = (e) => {
+    const results = e.data;
+    results.forEach(({ id, data }) => {
+        const canvas = document.querySelector(id);
+        const ctx = canvas.getContext('2d');
+        ctx.putImageData(data, 0, 0);
+    });
+};
 // begin main
 spawnRow(0n, 'bottom');
 fill();
 // reset scroll position on load, we will be updating it based on the #frag
 history.scrollRestoration = "manual";
+worker.onerror = (e) => console.log("oops", e);
 let debounced = false;
 document.querySelector("main")?.addEventListener('scroll', () => {
     if (!debounced) {
