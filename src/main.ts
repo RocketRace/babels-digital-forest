@@ -16,9 +16,9 @@ let lastRow = 0n;
 let currentValue = 0n;
 
 const spawnRow = (row: bigint, position: 'top' | 'bottom') => {
+    const links: HTMLAnchorElement[] = [];
     for (let i = 0n; i < rowSize; i++) {
         const n = row * rowSize + i;
-        const banners = document.querySelector('#banners')!;
         const link = document.createElement('a');
         link.href = `${imageBaseUrl}/${n.toString(16)}`;
         link.target = "_blank";
@@ -29,12 +29,14 @@ const spawnRow = (row: bigint, position: 'top' | 'bottom') => {
         canvas.height = height;
         
         link.append(canvas);
+        links.push(link);
         // this could be funny to write as (?:)(link)
-        if (position === 'bottom') {
-            banners.append(link);
-        } else {
-            banners.prepend(link);
-        }
+    }
+    const banners = document.querySelector('#banners')!;
+    if (position === 'bottom') {
+        banners.append(...links);
+    } else {
+        banners.prepend(...links);
     }
 }
 
@@ -48,7 +50,7 @@ const goto = (n: bigint) => {
     currentValue = n;
     const row = n / rowSize;
     firstRow = row;
-    lastRow = row - 1n; // will get filled in fill()
+    lastRow = row - 1n;
     const banners = document.querySelector('#banners')!;
     // make a copy of childNodes as it is updated on removals
     [...banners.childNodes].forEach(child => banners.removeChild(child));
@@ -94,7 +96,7 @@ const fill = () => {
     const lastCount = Number((lastRow - oldLast) * rowSize);
     if (lastCount > 0) {
         worker.postMessage({
-            first: oldLast * rowSize,
+            first: (oldLast + 1n) * rowSize,
             count: lastCount
         });
     }
@@ -129,8 +131,7 @@ worker.onmessage = (e) => {
     });
 }
 // begin main
-spawnRow(0n, 'bottom');
-fill();
+goto(0n);
 // reset scroll position on load, we will be updating it based on the #frag
 history.scrollRestoration = "manual";
 
