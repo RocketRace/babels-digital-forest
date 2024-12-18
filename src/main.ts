@@ -1,4 +1,4 @@
-const meterUnits = 1n << 24n;
+const meterUnits = 1n << 52n;
 const pageBaseUrl = "http://localhost:8000";
 const imageBaseUrl = "https://88x31er.vercel.app/img";
 
@@ -67,7 +67,7 @@ const setMeter = (n: bigint) => {
     
     const percent = document.querySelector<HTMLLabelElement>('#percent')!;
     const ratio = value / Number(meterUnits);
-    percent.innerText = `${(ratio * 100).toFixed(6)}%`;
+    percent.innerText = `${(ratio * 100).toFixed(13)}%`;
 }
 
 
