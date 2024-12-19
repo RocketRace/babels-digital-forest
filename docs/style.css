@@ -110,3 +110,37 @@ nav {
     flex-direction: column;
     align-items: start;
 }
+
+hr {
+    margin: 4px;
+}
+
+.relaxed * {
+    animation: sleep 1s ease-in-out forwards;
+}
+
+.woken * {
+    animation: wake 1s ease-in-out forwards;
+}
+
+@keyframes sleep {
+    from {
+        opacity: 100%;
+    }
+    to {
+        opacity: 0%;
+        display: none;
+        height: 0;
+    }
+}
+
+@keyframes wake {
+    from {
+        opacity: 0%;
+        display: none;
+        height: 0;
+    }
+    to {
+        opacity: 100%;
+    }
+}

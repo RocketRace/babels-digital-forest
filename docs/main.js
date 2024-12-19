@@ -218,3 +218,42 @@ document.querySelector('#random')?.addEventListener('click', () => {
     const n = BigInt("0x" + list.join(""));
     goto(n, true);
 });
+document.querySelector('#relax')?.addEventListener('click', () => {
+    const footer = document.querySelector("footer");
+    footer.classList.add("relaxed");
+    setTimeout(() => {
+        footer.querySelectorAll("input, button").forEach(element => element.disabled = true);
+        const click = () => {
+            footer.classList.remove("relaxed");
+            footer.classList.add("woken");
+            footer.querySelectorAll("input, button").forEach(element => element.disabled = false);
+            document.removeEventListener('click', click);
+            setTimeout(() => {
+                halting = true;
+                footer.classList.remove("woken");
+            }, 1000);
+        };
+        document.addEventListener('click', click);
+    }, 1000);
+    let halting = false;
+    let px = 1;
+    const scroller = () => {
+        document.querySelector("main").scrollBy({
+            top: px,
+            behavior: "instant",
+        });
+        if (halting) {
+            px -= 0.1;
+        }
+        else if (px < 4) {
+            px += 0.1;
+        }
+        else {
+            px = 4; // rounded for convenience
+        }
+        if (px > 0) {
+            requestAnimationFrame(scroller);
+        }
+    };
+    scroller();
+});
