@@ -45,7 +45,7 @@ const setVisibilities = () => {
     document.querySelector<HTMLInputElement>('#bottom')!.hidden = lastRow === totalRows() - 1n;
 }
 
-const goto = (n: bigint, forceFocus ?: boolean) => {
+const goto = (n: bigint, overrideFocus ?: boolean) => {
     currentValue = n;
     const row = n / rowSize;
     firstRow = row;
@@ -54,11 +54,14 @@ const goto = (n: bigint, forceFocus ?: boolean) => {
     // make a copy of childNodes as it is updated on removals
     [...banners.childNodes].forEach(child => banners.removeChild(child));
     fill();
-    if (forceFocus || document.querySelector(":focus") !== null) {
+    const focus = overrideFocus ?? (document.activeElement !== null);
+    if (focus) {   
         const canvas = document.querySelector<HTMLCanvasElement>(`#x${n.toString(16)}`);
         if (canvas) {
             (canvas.parentElement as HTMLAnchorElement).focus();
         }
+    } else {
+        (document.activeElement as HTMLElement)?.blur()
     }
 }
 
@@ -143,7 +146,7 @@ worker.onmessage = (e) => {
 }
 worker.onerror = (e) => console.log("oops", e);
 // begin main
-goto(0n);
+goto(0n, false);
 // reset scroll position on load, we will be updating it based on the #frag
 history.scrollRestoration = "manual";
 
@@ -209,7 +212,7 @@ document.querySelector('#search')?.addEventListener('click',  () => {
         })
     }
 })
-document.querySelector('#scroll')?.addEventListener('click', () => goto(0n));
+document.querySelector('#scroll')?.addEventListener('click', () => goto(0n, false));
 document.querySelector('#random')?.addEventListener('click', () => {
     const buffer = new Uint8Array(totalBits / 8);
     crypto.getRandomValues(buffer);
