@@ -1,5 +1,4 @@
 const meterUnits = 1n << 52n;
-const pageBaseUrl = "http://localhost:8000";
 
 const getRowSize = () => BigInt(Math.floor((
     document.querySelector<HTMLDivElement>("#loader")!
@@ -19,7 +18,7 @@ const spawnRow = (row: bigint, position: 'top' | 'bottom') => {
         const n = row * rowSize + i;
         const link = document.createElement('a');
         const hex = `x${n.toString(16)}`
-        link.href = `${pageBaseUrl}/#${hex}`;
+        link.href = `./#${hex}`;
         
         const canvas = document.createElement('canvas');
         canvas.id = hex;
