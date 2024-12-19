@@ -1,7 +1,6 @@
 "use strict";
 const meterUnits = 1n << 52n;
 const pageBaseUrl = "http://localhost:8000";
-const imageBaseUrl = "https://88x31er.vercel.app/img";
 const getRowSize = () => BigInt(Math.floor((document.querySelector("#loader")
     .getBoundingClientRect().width - 32) / (width + 2 * 4)
 //            WARNING: relies on CSS ^^             ^^^^^
@@ -17,10 +16,10 @@ const spawnRow = (row, position) => {
     for (let i = 0n; i < rowSize; i++) {
         const n = row * rowSize + i;
         const link = document.createElement('a');
-        link.href = `${imageBaseUrl}/${n.toString(16)}`;
-        link.target = "_blank";
+        const hex = `x${n.toString(16)}`;
+        link.href = `${pageBaseUrl}/#${hex}`;
         const canvas = document.createElement('canvas');
-        canvas.id = `x${n.toString(16)}`;
+        canvas.id = hex;
         canvas.width = width;
         canvas.height = height;
         link.append(canvas);
@@ -51,13 +50,16 @@ const goto = (n, overrideFocus) => {
     fill();
     const focus = overrideFocus ?? (document.activeElement !== null);
     if (focus) {
-        const canvas = document.querySelector(`#x${n.toString(16)}`);
+        const hash = `#x${n.toString(16)}`;
+        const canvas = document.querySelector(hash);
         if (canvas) {
             canvas.parentElement.focus();
         }
+        location.hash = hash;
     }
     else {
         document.activeElement?.blur();
+        location.hash = "";
     }
 };
 const setMeter = (n) => {
@@ -134,7 +136,20 @@ worker.onmessage = (e) => {
 };
 worker.onerror = (e) => console.log("oops", e);
 // begin main
-goto(0n, false);
+if (location.hash.startsWith("#")) {
+    goto(BigInt("0" + location.hash.slice(1)), true);
+}
+else {
+    goto(0n, false);
+}
+window.onhashchange = () => {
+    const canvas = document.querySelector(location.hash);
+    if (canvas) {
+        canvas.parentElement.focus();
+        // align the outline a bit better
+        document.querySelector("main")?.scrollBy(0, -8);
+    }
+};
 // reset scroll position on load, we will be updating it based on the #frag
 history.scrollRestoration = "manual";
 let debounced = false;

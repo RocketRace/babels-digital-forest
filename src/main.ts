@@ -1,6 +1,5 @@
 const meterUnits = 1n << 52n;
 const pageBaseUrl = "http://localhost:8000";
-const imageBaseUrl = "https://88x31er.vercel.app/img";
 
 const getRowSize = () => BigInt(Math.floor((
     document.querySelector<HTMLDivElement>("#loader")!
@@ -19,11 +18,11 @@ const spawnRow = (row: bigint, position: 'top' | 'bottom') => {
     for (let i = 0n; i < rowSize; i++) {
         const n = row * rowSize + i;
         const link = document.createElement('a');
-        link.href = `${imageBaseUrl}/${n.toString(16)}`;
-        link.target = "_blank";
+        const hex = `x${n.toString(16)}`
+        link.href = `${pageBaseUrl}/#${hex}`;
         
         const canvas = document.createElement('canvas');
-        canvas.id = `x${n.toString(16)}`;
+        canvas.id = hex;
         canvas.width = width;
         canvas.height = height;
         
@@ -55,13 +54,16 @@ const goto = (n: bigint, overrideFocus ?: boolean) => {
     [...banners.childNodes].forEach(child => banners.removeChild(child));
     fill();
     const focus = overrideFocus ?? (document.activeElement !== null);
-    if (focus) {   
-        const canvas = document.querySelector<HTMLCanvasElement>(`#x${n.toString(16)}`);
+    if (focus) {
+        const hash = `#x${n.toString(16)}`;
+        const canvas = document.querySelector<HTMLCanvasElement>(hash);
         if (canvas) {
             (canvas.parentElement as HTMLAnchorElement).focus();
         }
+        location.hash = hash;
     } else {
         (document.activeElement as HTMLElement)?.blur()
+        location.hash = "";
     }
 }
 
@@ -146,7 +148,20 @@ worker.onmessage = (e) => {
 }
 worker.onerror = (e) => console.log("oops", e);
 // begin main
-goto(0n, false);
+if (location.hash.startsWith("#")) {
+    goto(BigInt("0" + location.hash.slice(1)), true);
+}
+else {
+    goto(0n, false);
+}
+window.onhashchange = () => {
+    const canvas = document.querySelector<HTMLCanvasElement>(location.hash);
+    if (canvas) {
+        (canvas.parentElement as HTMLAnchorElement).focus();
+        // align the outline a bit better
+        document.querySelector("main")?.scrollBy(0, -8)
+    }
+}
 // reset scroll position on load, we will be updating it based on the #frag
 history.scrollRestoration = "manual";
 
