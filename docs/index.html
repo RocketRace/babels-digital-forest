@@ -59,23 +59,25 @@
     <footer>
         <div id="progress">
             <label id="percent">0%</label>
-            <meter min="0" max="1" value="0"></meter></div>
-        <div>
+            <meter min="0" max="1" value="0"></meter>
+        </div>
+        <div class="chunk">
             <label>
                 Jump to entry
                 <input type="string" id="goto"></input>
             </label>
             <button id="jump">Jump</button>
         </div>
-        <div>
+        <div class="chunk">
             <label>
                 Search by image
                 <input type="file" id="image" accept="image/*,.gif"></input>
             </label>
             <button id="search">Search</button>
         </div>
-        <div>
+        <div class="chunk">
             <button id="scroll">Scroll to top</button>
+            <button id="random">Scroll to random entry</button>
         </div>
     </footer>
 </body>

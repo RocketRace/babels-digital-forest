@@ -125,7 +125,13 @@ const worker = new Worker("./worker.js");
 worker.onmessage = (e) => {
     const results = e.data;
     results.forEach(({id, data}: {id: string, data: ImageData}) => {
-        const canvas = document.querySelector<HTMLCanvasElement>(id)!;
+        const canvas = document.querySelector<HTMLCanvasElement>(id);
+        if (canvas === null) {
+            // The canvases were unloaded while the worker was running
+            // this does mean that all the computation still runs, only
+            // that it's discarded afterwards
+            return;
+        }
         const ctx = canvas.getContext('2d')!;
         ctx.putImageData(data, 0, 0);
     });
@@ -200,3 +206,10 @@ document.querySelector('#search')?.addEventListener('click',  () => {
     }
 })
 document.querySelector('#scroll')?.addEventListener('click', () => goto(0n));
+document.querySelector('#random')?.addEventListener('click', () => {
+    const buffer = new Uint8Array(totalBits / 8);
+    crypto.getRandomValues(buffer);
+    const list = [...buffer].map(byte => byte.toString(16).padStart(2, "0"));
+    const n = BigInt("0x" + list.join(""))
+    goto(n);
+});
