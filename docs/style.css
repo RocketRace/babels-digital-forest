@@ -64,7 +64,12 @@ button {
 #banners > a {
     display: inline-block;
     /* WARNING: code relies on this */
-    padding: 4px;
+    padding: 2px;
+    margin: 2px;
+}
+
+a:focus {
+    outline: 2px dashed mediumaquamarine;
 }
 
 footer {

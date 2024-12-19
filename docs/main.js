@@ -8,8 +8,7 @@ const getRowSize = () => BigInt(Math.floor((document.querySelector("#loader")
 ));
 // Global state
 let rowSize = getRowSize();
-// Integer division rounding up
-const totalRows = () => (totalBanners + rowSize - 1n) / rowSize;
+const totalRows = () => (totalBanners + rowSize - 1n) / rowSize; // Ceiling division
 let firstRow = 0n;
 let lastRow = 0n;
 let currentValue = 0n;
@@ -41,7 +40,7 @@ const setVisibilities = () => {
     document.querySelector('#top').hidden = firstRow === 0n;
     document.querySelector('#bottom').hidden = lastRow === totalRows() - 1n;
 };
-const goto = (n) => {
+const goto = (n, forceFocus) => {
     currentValue = n;
     const row = n / rowSize;
     firstRow = row;
@@ -50,6 +49,12 @@ const goto = (n) => {
     // make a copy of childNodes as it is updated on removals
     [...banners.childNodes].forEach(child => banners.removeChild(child));
     fill();
+    if (forceFocus || document.querySelector(":focus") !== null) {
+        const canvas = document.querySelector(`#x${n.toString(16)}`);
+        if (canvas) {
+            canvas.parentElement.focus();
+        }
+    }
 };
 const setMeter = (n) => {
     const meter = document.querySelector('meter');
@@ -123,11 +128,11 @@ worker.onmessage = (e) => {
         ctx.putImageData(data, 0, 0);
     });
 };
+worker.onerror = (e) => console.log("oops", e);
 // begin main
 goto(0n);
 // reset scroll position on load, we will be updating it based on the #frag
 history.scrollRestoration = "manual";
-worker.onerror = (e) => console.log("oops", e);
 let debounced = false;
 document.querySelector("main")?.addEventListener('scroll', () => {
     if (!debounced) {
@@ -160,7 +165,7 @@ document.querySelector('#jump')?.addEventListener('click', () => {
         console.log("kissa");
     }
     else {
-        goto(value);
+        goto(value, true);
     }
 });
 document.querySelector('#search')?.addEventListener('click', () => {
@@ -183,7 +188,7 @@ document.querySelector('#search')?.addEventListener('click', () => {
                 }
             }
             const n = unlcg(BigInt(hex.join('')));
-            goto(n);
+            goto(n, true);
         });
     }
 });
@@ -193,5 +198,5 @@ document.querySelector('#random')?.addEventListener('click', () => {
     crypto.getRandomValues(buffer);
     const list = [...buffer].map(byte => byte.toString(16).padStart(2, "0"));
     const n = BigInt("0x" + list.join(""));
-    goto(n);
+    goto(n, true);
 });
