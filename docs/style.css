@@ -33,7 +33,12 @@ article {
 }
 
 p, summary {
+    font-size: 1.05em;
     color: mintcream;
+}
+
+* {
+    font-family: 'Times New Roman', Times, serif;
 }
 
 summary {
@@ -49,15 +54,13 @@ header {
 h1 {
     overflow-wrap: break-word;
     max-width: 100%;
+    margin: 0.5em 0 0.5em 0;
 }
 
 .block-line > span {
     display: inline-block;
 }
 
-* {
-    font-family: 'Times New Roman', Times, serif;
-}
 
 button {
     background-color: teal;
