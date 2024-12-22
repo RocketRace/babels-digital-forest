@@ -48,7 +48,7 @@ const goto = (n, overrideFocus) => {
     [...banners.childNodes].forEach(child => banners.removeChild(child));
     fill();
     const focus = overrideFocus ?? (document.activeElement !== null);
-    if (focus) {
+    if (focus && n !== 0n) {
         const hash = `#x${n.toString(16)}`;
         const canvas = document.querySelector(hash);
         if (canvas) {
