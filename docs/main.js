@@ -142,11 +142,13 @@ else {
     goto(0n, false);
 }
 window.onhashchange = () => {
-    const canvas = document.querySelector(location.hash);
-    if (canvas) {
-        canvas.parentElement.focus();
-        // align the outline a bit better
-        document.querySelector("main")?.scrollBy(0, -8);
+    if (location.hash) {
+        const canvas = document.querySelector(location.hash);
+        if (canvas) {
+            canvas.parentElement.focus();
+            // align the outline a bit better
+            document.querySelector("main")?.scrollBy(0, -8);
+        }
     }
 };
 // reset scroll position on load, we will be updating it based on the #frag
