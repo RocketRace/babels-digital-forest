@@ -32,8 +32,12 @@ article {
     margin: 1em 0;
 }
 
-p {
-    color: white;
+p, summary {
+    color: mintcream;
+}
+
+summary {
+    font-style: italic;
 }
 
 header {
