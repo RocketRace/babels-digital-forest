@@ -43,8 +43,12 @@ header {
 }
 
 h1 {
-    word-wrap: break-word;
+    overflow-wrap: break-word;
     max-width: 100%;
+}
+
+.block-line > span {
+    display: inline-block;
 }
 
 * {
@@ -131,7 +135,7 @@ nav {
         max-width: 100%;
     }
 }
-@media screen and (min-width: 640px) and (max-width: 731px) {
+@media screen and (min-width: 640px) and (max-width: 749px) {
     #squisher {
         max-width: 80%;
     }
@@ -139,7 +143,7 @@ nav {
         margin: 10px 0;
     }
 }
-@media screen and (min-width: 732px) {
+@media screen and (min-width: 750px) {
     #squisher {
         max-width: 70%;
     }
