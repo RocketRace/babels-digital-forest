@@ -225,18 +225,20 @@ document.querySelector('#relax')?.addEventListener('click', () => {
     footer.classList.add("relaxed");
     setTimeout(() => {
         footer.querySelectorAll("input, button").forEach(element => element.disabled = true);
-        const click = () => {
+        const stop = () => {
             footer.classList.remove("relaxed");
             footer.classList.add("woken");
             footer.querySelectorAll("input, button").forEach(element => element.disabled = false);
-            document.removeEventListener('click', click);
+            document.removeEventListener('click', stop);
+            document.removeEventListener('keydown', stop);
+            halting = true;
             setTimeout(() => {
-                halting = true;
                 footer.classList.remove("woken");
             }, 1000);
         };
-        document.addEventListener('click', click);
-    }, 1000);
+        document.addEventListener('click', stop);
+        document.addEventListener('keydown', stop);
+    }, 100);
     let halting = false;
     let px = 1;
     const scroller = () => {
