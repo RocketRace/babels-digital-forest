@@ -14,6 +14,9 @@ const spawnRow = (row, position) => {
     const links = [];
     for (let i = 0n; i < rowSize; i++) {
         const n = row * rowSize + i;
+        if (n >= totalBanners) {
+            break;
+        }
         const link = document.createElement('a');
         const hex = `x${n.toString(16)}`;
         link.href = `./#${hex}`;
@@ -176,6 +179,22 @@ window.addEventListener('resize', () => {
     if (oldRowSize !== rowSize) {
         goto(currentValue);
     }
+});
+document.querySelector("meter")?.addEventListener('click', e => {
+    const meter = document.querySelector("meter");
+    const px = (e.clientX - meter.offsetLeft) / meter.clientWidth;
+    if (px === 1) {
+        goto(totalBanners - 1n);
+    }
+    else if (px === 0) {
+        goto(0n);
+    }
+    else {
+        const n = BigInt(Math.round(px * 2 ** 52));
+        // some shuffling because otherwise you see #0 everywhere lol
+        goto((n * totalBanners >> 52n) + 3n ** 32n);
+    }
+    console.log(px);
 });
 document.querySelector('#jump')?.addEventListener('click', () => {
     const target = document.querySelector('#goto');
