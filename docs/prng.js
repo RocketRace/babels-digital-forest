@@ -5,5 +5,5 @@ const ainv = 0x5de57821816a4149b262cbdd8bd8f4dcb089dcdcf0b796f0482e002a0e049db11
 const d = (totalBanners - c) * ainv % totalBanners;
 // inverse LCG operation
 const unlcg = (n) => {
-    return BigInt.asUintN(totalBits, (n - offset) * ainv + d);
+    return BigInt.asUintN(totalBits, n * ainv + d - offset);
 };

@@ -6,5 +6,5 @@ const d = (totalBanners - c) * ainv % totalBanners;
 
 // inverse LCG operation
 const unlcg = (n: bigint): bigint => {
-    return BigInt.asUintN(totalBits, (n - offset) * ainv + d);
+    return BigInt.asUintN(totalBits, n * ainv + d - offset);
 }
