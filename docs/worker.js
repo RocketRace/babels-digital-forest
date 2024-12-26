@@ -1,7 +1,7 @@
 "use strict";
 importScripts('./constants.js');
 const render = (first, count) => {
-    let bits = BigInt.asUintN(totalBits, first * a + c);
+    let bits = BigInt.asUintN(totalBits, (first + offset) * a + c);
     const results = [];
     for (let i = 0n; i < count; i++) {
         const n = first + i;
