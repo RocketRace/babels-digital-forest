@@ -193,3 +193,11 @@ hr {
         opacity: 100%;
     }
 }
+
+pre {
+    color: white;
+    border: solid 1px white;
+    font-family: monospace;
+    max-width: 100%;
+    overflow: scroll;
+}
