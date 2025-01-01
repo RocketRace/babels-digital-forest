@@ -84,7 +84,7 @@ const setMeter = (n: bigint) => {
 
 
 const fill = () => {
-    const leeway = 400;
+    const leeway = 1600;
     const top = document.querySelector<HTMLDivElement>("#top")!;
     const bottom = document.querySelector<HTMLDivElement>("#bottom")!;
     const main = document.querySelector("main")!;
@@ -136,7 +136,7 @@ const fill = () => {
 const worker = new Worker("./worker.js");
 worker.onmessage = (e) => {
     const results = e.data;
-    results.forEach(({id, data}: {id: string, data: ImageData}) => {
+    results.forEach(({id, bitmap}: {id: string, bitmap: ImageBitmap}) => {
         const canvas = document.querySelector<HTMLCanvasElement>(id);
         if (canvas === null) {
             // The canvases were unloaded while the worker was running
@@ -144,8 +144,8 @@ worker.onmessage = (e) => {
             // that it's discarded afterwards
             return;
         }
-        const ctx = canvas.getContext('2d')!;
-        ctx.putImageData(data, 0, 0);
+        const ctx = canvas.getContext("bitmaprenderer")!
+        ctx.transferFromImageBitmap(bitmap);
     });
 }
 worker.onerror = (e) => console.log("oops", e);

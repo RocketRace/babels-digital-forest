@@ -2,6 +2,8 @@
 importScripts('./constants.js');
 const render = (first, count) => {
     let bits = BigInt.asUintN(totalBits, (first + offset) * a + c);
+    const canvas = new OffscreenCanvas(width, height);
+    const ctx = canvas.getContext('2d');
     const results = [];
     for (let i = 0n; i < count; i++) {
         const n = first + i;
@@ -19,7 +21,9 @@ const render = (first, count) => {
             }
         }
         const id = `#x${n.toString(16)}`;
-        results.push({ id: id, data: data });
+        ctx.putImageData(data, 0, 0);
+        const bitmap = canvas.transferToImageBitmap();
+        results.push({ id: id, bitmap: bitmap });
         bits = BigInt.asUintN(totalBits, bits + a);
     }
     return results;

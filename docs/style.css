@@ -205,3 +205,8 @@ pre {
     max-width: 100%;
     overflow: scroll;
 }
+
+#top, #bottom {
+    display: block;
+    height: 400px;
+}
