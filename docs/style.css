@@ -210,3 +210,7 @@ pre {
     display: block;
     height: 400px;
 }
+
+#top[hidden], #bottom[hidden] {
+    display: none;
+}
